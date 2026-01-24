@@ -17,16 +17,13 @@ export default function JobsPage() {
 
     useEffect(() => {
         // Real-time listener for jobs
-        const q = query(collection(db, "jobs"), orderBy("postedAtTimestamp", "desc"));
+        const q = query(collection(db, "jobs"), orderBy("postedAt", "desc"));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const jobsData = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
-                // Simple client-side formatting override if needed, 
-                // mostly relying on what we stored or a helper
-                postedAt: doc.data().postedAt || "Just now"
-            }));
+            })) as any[]; // Cast as any first to avoid timestamp issues, usually safe
             setJobs(jobsData);
             setLoading(false);
         });
@@ -47,14 +44,12 @@ export default function JobsPage() {
                     <p className="text-slate-500 mt-2">Find the best jobs in your area.</p>
                 </div>
 
-                {user && (
-                    <button
-                        onClick={() => setShowPostForm(!showPostForm)}
-                        className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-semibold shadow-md transition"
-                    >
-                        {showPostForm ? "Cancel" : <><Plus className="w-5 h-5" /> Post a Job</>}
-                    </button>
-                )}
+                <button
+                    onClick={() => setShowPostForm(!showPostForm)}
+                    className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-full font-semibold shadow-md transition"
+                >
+                    {showPostForm ? "Cancel" : <><Plus className="w-5 h-5" /> Post a Job</>}
+                </button>
             </div>
 
             {showPostForm && (

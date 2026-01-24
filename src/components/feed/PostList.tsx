@@ -7,12 +7,18 @@ import { Post } from "@/types";
 import { Heart, MessageCircle, Share2, MoreHorizontal } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
-export default function PostList() {
+import { where } from "firebase/firestore"; // Add import
+
+export default function PostList({ userId }: { userId?: string }) {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+        let q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
+
+        if (userId) {
+            q = query(collection(db, "posts"), where("authorId", "==", userId), orderBy("createdAt", "desc"));
+        }
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const newPosts = snapshot.docs.map((doc) => ({
@@ -24,7 +30,7 @@ export default function PostList() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [userId]);
 
     if (loading) {
         return (

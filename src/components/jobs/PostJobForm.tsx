@@ -15,7 +15,8 @@ export default function PostJobForm({ onSuccess }: { onSuccess: () => void }) {
         location: "",
         type: "Full-time",
         salary: "",
-        description: ""
+        description: "",
+        contactEmail: ""
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -27,10 +28,7 @@ export default function PostJobForm({ onSuccess }: { onSuccess: () => void }) {
             await addDoc(collection(db, "jobs"), {
                 ...formData,
                 authorId: user.uid,
-                postedAtTimestamp: serverTimestamp(),
-                // We'll store a formatted string for display simplicity for now, 
-                // but the timestamp is what matters for sorting.
-                postedAt: "Just now"
+                postedAt: serverTimestamp(),
             });
             onSuccess();
         } catch (error) {
@@ -117,6 +115,19 @@ export default function PostJobForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
 
             <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Job Description</label>
+                <textarea
+                    name="description"
+                    required
+                    value={formData.description}
+                    onChange={handleChange}
+                    rows={4}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-100 outline-none resize-none"
+                    placeholder="Describe the role, responsibilities, and requirements..."
+                />
+            </div>
+
+            <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Salary (Optional)</label>
                 <div className="relative">
                     <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -128,6 +139,19 @@ export default function PostJobForm({ onSuccess }: { onSuccess: () => void }) {
                         placeholder="e.g. $80k - $100k"
                     />
                 </div>
+            </div>
+
+            <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1">Contact Email</label>
+                <input
+                    name="contactEmail"
+                    type="email"
+                    required
+                    value={formData.contactEmail}
+                    onChange={handleChange}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-100 outline-none"
+                    placeholder="recruiter@company.com"
+                />
             </div>
 
             <button

@@ -4,29 +4,24 @@ import { useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Send, Image as ImageIcon, Loader2 } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function CreatePost() {
     const [text, setText] = useState("");
     const [loading, setLoading] = useState(false);
+    const { user, profile } = useAuth(); // Get real user
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!text.trim()) return;
+        if (!text.trim() || !user) return; // Guard clause
 
         setLoading(true);
         try {
-            // TODO: Replace with real user data when Auth is connected to context
-            const mockUser = {
-                uid: "user_123",
-                name: "Guest User",
-                avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
-            };
-
             await addDoc(collection(db, "posts"), {
                 text,
-                authorId: mockUser.uid,
-                authorName: mockUser.name,
-                authorAvatar: mockUser.avatar,
+                authorId: user.uid,
+                authorName: profile?.displayName || user.displayName || "Unknown User",
+                authorAvatar: profile?.photoURL || user.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest",
                 likes: 0,
                 createdAt: serverTimestamp(),
             });
@@ -45,9 +40,9 @@ export default function CreatePost() {
             <form onSubmit={handleSubmit}>
                 <div className="flex gap-4">
                     <img
-                        src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
+                        src={profile?.photoURL || user?.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"}
                         alt="User"
-                        className="w-10 h-10 rounded-full bg-slate-100"
+                        className="w-10 h-10 rounded-full bg-slate-100 object-cover"
                     />
                     <div className="flex-1">
                         <textarea
