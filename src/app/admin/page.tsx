@@ -3,10 +3,18 @@
 import { useEffect, useState } from "react";
 import { db } from "@/lib/firebase";
 import { collection, getDocs, deleteDoc, doc, updateDoc } from "firebase/firestore";
-import { Users, FileText, Trash2, Shield, ShieldCheck } from "lucide-react";
+import { Users, FileText, Trash2, Shield, ShieldCheck, ShieldAlert } from "lucide-react";
+
+import { UserProfile } from "@/types";
+
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation"; // Optional: redirect
 
 export default function AdminDashboard() {
-    const [users, setUsers] = useState<any[]>([]);
+    const { user, profile, loading: authLoading } = useAuth();
+    const router = useRouter();
+
+    const [users, setUsers] = useState<UserProfile[]>([]);
     const [postsCount, setPostsCount] = useState(0);
     const [loading, setLoading] = useState(true);
 
@@ -14,7 +22,7 @@ export default function AdminDashboard() {
         try {
             // Fetch Users
             const usersSnap = await getDocs(collection(db, "users"));
-            setUsers(usersSnap.docs.map(d => ({ id: d.id, ...d.data() })));
+            setUsers(usersSnap.docs.map(d => d.data() as UserProfile));
 
             // Fetch Posts Count (not efficient for large DBs, but fine for now)
             const postsSnap = await getDocs(collection(db, "posts"));
@@ -27,8 +35,15 @@ export default function AdminDashboard() {
     };
 
     useEffect(() => {
-        fetchData();
-    }, []);
+        if (!authLoading) {
+            if (profile?.role === 'admin') {
+                fetchData();
+            } else {
+                setLoading(false); // Stop loading to show access denied
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [authLoading, profile]);
 
     const makeAdmin = async (userId: string) => {
         if (confirm("Promote this user to Admin?")) {
@@ -45,7 +60,27 @@ export default function AdminDashboard() {
         }
     };
 
-    if (loading) return <div>Loading dashboard...</div>;
+    if (authLoading || loading) return <div className="p-20 text-center"><div className="animate-spin inline-block w-8 h-8 border-4 border-blue-500 rounded-full border-t-transparent"></div></div>;
+
+    if (profile?.role !== 'admin') {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center p-4">
+                <div className="bg-red-50 p-6 rounded-full mb-6 animate-pulse">
+                    <ShieldAlert className="w-16 h-16 text-red-500" />
+                </div>
+                <h1 className="text-3xl font-bold text-slate-800 mb-2">Access Denied</h1>
+                <p className="text-slate-500 max-w-md mx-auto mb-8">
+                    You do not have permission to view this area. This page is restricted to administrators only.
+                </p>
+                <button
+                    onClick={() => router.push('/')}
+                    className="px-6 py-2.5 bg-slate-900 text-white rounded-full font-medium hover:bg-slate-800 transition"
+                >
+                    Return Home
+                </button>
+            </div>
+        );
+    }
 
     return (
         <div className="space-y-8">
@@ -91,7 +126,7 @@ export default function AdminDashboard() {
                         </thead>
                         <tbody>
                             {users.map(user => (
-                                <tr key={user.id} className="border-b border-slate-50 hover:bg-slate-50/50">
+                                <tr key={user.uid} className="border-b border-slate-50 hover:bg-slate-50/50">
                                     <td className="px-6 py-4 font-medium text-slate-900">
                                         <div>{user.displayName}</div>
                                         <div className="text-slate-400 text-xs">{user.email}</div>
@@ -105,11 +140,11 @@ export default function AdminDashboard() {
                                     <td className="px-6 py-4">{user.city}</td>
                                     <td className="px-6 py-4 text-right flex justify-end gap-2">
                                         {user.role !== 'admin' && (
-                                            <button onClick={() => makeAdmin(user.id)} className="text-blue-600 hover:text-blue-800 p-1" title="Promote to Admin">
+                                            <button onClick={() => makeAdmin(user.uid)} className="text-blue-600 hover:text-blue-800 p-1" title="Promote to Admin">
                                                 <ShieldCheck className="w-4 h-4" />
                                             </button>
                                         )}
-                                        <button onClick={() => deleteUser(user.id)} className="text-red-500 hover:text-red-700 p-1" title="Delete User">
+                                        <button onClick={() => deleteUser(user.uid)} className="text-red-500 hover:text-red-700 p-1" title="Delete User">
                                             <Trash2 className="w-4 h-4" />
                                         </button>
                                     </td>

@@ -22,9 +22,20 @@ export default function LoginPage() {
         try {
             await signInWithEmailAndPassword(auth, email, password);
             router.push("/feed"); // Redirect to feed after login
-        } catch (err: any) {
-            console.error(err);
-            setError("Invalid email or password. Please try again.");
+        } catch (error: unknown) {
+            // Type guard
+            const authError = error as { code?: string; message?: string };
+            console.error("Login Error:", authError);
+            console.log("Error Code:", authError.code);
+            console.log("Error Message:", authError.message);
+
+            if (authError.code === 'auth/invalid-credential' || authError.code === 'auth/user-not-found' || authError.code === 'auth/wrong-password') {
+                setError("Invalid email or password.");
+            } else if (authError.code === 'auth/too-many-requests') {
+                setError("Too many attempts. Please try again later.");
+            } else {
+                setError("Failed to sign in. Check your connection.");
+            }
         } finally {
             setLoading(false);
         }
@@ -92,7 +103,7 @@ export default function LoginPage() {
             </form>
 
             <div className="mt-8 text-center text-sm text-slate-600">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link href="/signup" className="font-medium text-blue-600 hover:text-blue-500">
                     Create account
                 </Link>

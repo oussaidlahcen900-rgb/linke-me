@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Users, Briefcase, GraduationCap, ArrowRight } from "lucide-react";
 import BackgroundSlider from "@/components/BackgroundSlider";
 import { motion } from "framer-motion";
+import { GradientText } from "@/components/ui/GradientText";
 
 export default function LandingPage() {
   return (
@@ -45,9 +46,10 @@ export default function LandingPage() {
         >
           <h1 className="text-4xl font-extrabold tracking-tight text-white drop-shadow-lg sm:text-6xl leading-tight">
             Connect locally. <br />
-            <span className="text-blue-200">
+            <br />
+            <GradientText from="from-blue-200" via="via-white" to="to-blue-200">
               Grow globally.
-            </span>
+            </GradientText>
           </h1>
           <p className="text-lg text-white/90 max-w-xl mx-auto drop-shadow-md font-medium">
             The social platform for your city. Find jobs, training, and services right next door.
@@ -99,7 +101,9 @@ export default function LandingPage() {
   );
 }
 
-function FeatureCard({ icon: Icon, title, desc, delay }: { icon: any, title: string, desc: string, delay: number }) {
+import { ElementType } from "react";
+
+function FeatureCard({ icon: Icon, title, desc, delay }: { icon: ElementType, title: string, desc: string, delay: number }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}

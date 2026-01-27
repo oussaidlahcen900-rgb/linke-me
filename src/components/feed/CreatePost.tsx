@@ -5,20 +5,36 @@ import { db } from "@/lib/firebase";
 import { collection, addDoc, serverTimestamp } from "firebase/firestore";
 import { Send, Image as ImageIcon, Loader2 } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import ImageUpload from "@/components/ui/ImageUpload";
+import { uploadFile } from "@/lib/storageUtils";
 
 export default function CreatePost() {
+
+
+    // ... inside component
     const [text, setText] = useState("");
     const [loading, setLoading] = useState(false);
+    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [showImageUpload, setShowImageUpload] = useState(false);
     const { user, profile } = useAuth(); // Get real user
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!text.trim() || !user) return; // Guard clause
+        if (!user) return;
+        if (!text.trim() && !selectedFile) return;
 
         setLoading(true);
         try {
+            let imageUrl = "";
+            if (selectedFile) {
+                // Upload image first
+                const path = `posts/${user.uid}/${Date.now()}_${selectedFile.name}`;
+                imageUrl = await uploadFile(selectedFile, path);
+            }
+
             await addDoc(collection(db, "posts"), {
                 text,
+                imageUrl, // Now a real URL from storage
                 authorId: user.uid,
                 authorName: profile?.displayName || user.displayName || "Unknown User",
                 authorAvatar: profile?.photoURL || user.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest",
@@ -27,9 +43,11 @@ export default function CreatePost() {
             });
 
             setText("");
+            setSelectedFile(null);
+            setShowImageUpload(false);
         } catch (error) {
             console.error("Error adding post: ", error);
-            alert("Failed to post. Please check your connection.");
+            alert("Failed to post. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -52,17 +70,27 @@ export default function CreatePost() {
                             className="w-full resize-none border-none focus:ring-0 text-slate-700 placeholder:text-slate-400 text-lg min-h-[80px]"
                         />
 
+                        {showImageUpload && (
+                            <div className="mb-4">
+                                <ImageUpload
+                                    onImageSelected={setSelectedFile}
+                                    onClear={() => setSelectedFile(null)}
+                                />
+                            </div>
+                        )}
+
                         <div className="flex items-center justify-between pt-2 border-t border-slate-50 mt-2">
                             <button
                                 type="button"
-                                className="text-slate-400 hover:text-blue-500 p-2 rounded-full hover:bg-blue-50 transition"
+                                onClick={() => setShowImageUpload(!showImageUpload)}
+                                className={`p-2 rounded-full transition ${showImageUpload ? 'bg-blue-50 text-blue-500' : 'text-slate-400 hover:text-blue-500 hover:bg-blue-50'}`}
                             >
                                 <ImageIcon className="w-5 h-5" />
                             </button>
 
                             <button
                                 type="submit"
-                                disabled={!text.trim() || loading}
+                                disabled={(!text.trim() && !selectedFile) || loading}
                                 className="btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                                 {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Send className="w-4 h-4" />}
@@ -74,4 +102,5 @@ export default function CreatePost() {
             </form>
         </div>
     );
+
 }

@@ -9,7 +9,7 @@ export default function JobCard({ job }: { job: Job }) {
         : "Recently";
 
     return (
-        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover:shadow-md transition group">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover-bounce transition group">
             <div className="flex justify-between items-start">
                 <div>
                     <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition">

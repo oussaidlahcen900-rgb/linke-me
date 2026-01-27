@@ -1,6 +1,6 @@
 import CreatePost from "@/components/feed/CreatePost";
 import PostList from "@/components/feed/PostList";
-import { User, MapPin, Briefcase } from "lucide-react";
+import { MapPin, Briefcase } from "lucide-react";
 
 export default function FeedPage() {
     return (

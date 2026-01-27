@@ -38,7 +38,7 @@ export default function PostCourseForm({ onSuccess }: { onSuccess: () => void })
         }
     };
 
-    const handleChange = (e: React.ChangeEvent<any>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 

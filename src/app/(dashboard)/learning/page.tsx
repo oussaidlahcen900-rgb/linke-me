@@ -3,14 +3,15 @@
 import { useState, useEffect } from "react";
 import CourseCard from "@/components/learning/CourseCard";
 import PostCourseForm from "@/components/learning/PostCourseForm";
-import { Search, MapPin, Filter, Plus, Loader2 } from "lucide-react";
+import { Search, MapPin, Plus, Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
+import { Course } from "@/types";
 
 export default function LearningPage() {
     const { user } = useAuth();
-    const [courses, setCourses] = useState<any[]>([]);
+    const [courses, setCourses] = useState<Course[]>([]);
     const [filterCity, setFilterCity] = useState("New York, NY");
     const [showPostForm, setShowPostForm] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -19,7 +20,7 @@ export default function LearningPage() {
         const q = query(collection(db, "courses"), orderBy("createdAt", "desc"));
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setCourses(data);
+            setCourses(data as Course[]);
             setLoading(false);
         });
         return () => unsubscribe();
@@ -33,7 +34,7 @@ export default function LearningPage() {
         <div className="max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">Learning Center</h1>
+                    <h1 className="text-3xl font-bold text-slate-900 text-gradient bg-clip-text text-transparent">Learning Center</h1>
                     <p className="text-slate-500 mt-2">Find courses, workshops, and local training.</p>
                 </div>
 

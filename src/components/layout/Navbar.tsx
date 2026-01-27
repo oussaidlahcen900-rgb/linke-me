@@ -1,8 +1,9 @@
 "use client";
 
-import { Bell, Search, MapPin, Menu, X, Home, Briefcase, Wrench, GraduationCap, User } from "lucide-react";
+import { Bell, Search, MapPin, Menu, X, Home, Briefcase, Wrench, GraduationCap, User, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import Link from "next/link";
+import SearchBar from "@/components/layout/SearchBar";
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -12,6 +13,7 @@ export default function Navbar() {
         { name: "Jobs", href: "/jobs", icon: Briefcase },
         { name: "Services", href: "/services", icon: Wrench },
         { name: "Learning", href: "/learning", icon: GraduationCap },
+        { name: "Messages", href: "/chat", icon: MessageSquare },
         { name: "Profile", href: "/profile", icon: User },
     ];
 
@@ -28,14 +30,7 @@ export default function Navbar() {
             </div>
 
             <div className="hidden max-w-md flex-1 lg:block">
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
-                    <input
-                        type="text"
-                        placeholder="Search jobs, people, services..."
-                        className="h-10 w-full rounded-full border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                    />
-                </div>
+                <SearchBar />
             </div>
 
             <div className="flex items-center gap-2 md:gap-4">

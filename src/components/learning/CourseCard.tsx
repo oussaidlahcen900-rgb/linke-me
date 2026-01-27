@@ -15,7 +15,7 @@ interface CourseProps {
 
 export default function CourseCard({ course }: { course: CourseProps }) {
     return (
-        <div className="card hover:border-blue-200 cursor-pointer group mb-4">
+        <div className="bg-white p-5 rounded-xl shadow-sm border border-slate-100 hover-bounce transition cursor-pointer group mb-4">
             <div className="flex justify-between items-start">
                 <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition">{course.title}</h3>
                 {course.price && (

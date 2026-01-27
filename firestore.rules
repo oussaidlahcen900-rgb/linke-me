@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper function to check if user is admin
+    function isAdmin() {
+      return request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+    }
+
+    // Users: Public read, Owner write
+    match /users/{userId} {
+      allow read: if true;
+      allow write: if request.auth != null && (request.auth.uid == userId || isAdmin());
+    }
+
+    // Posts: Public read, Auth create, Owner/Admin modify
+    match /posts/{postId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (request.auth.uid == resource.data.authorId || isAdmin());
+    }
+
+    // Services: Public read, Auth create, Owner/Admin modify
+    match /services/{serviceId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (request.auth.uid == resource.data.providerId || isAdmin());
+    }
+
+    // Jobs: Public read, Auth create, Owner/Admin modify
+    match /jobs/{jobId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (request.auth.uid == resource.data.posterId || isAdmin());
+    }
+
+    // Courses: Public read, Auth create, Owner/Admin modify
+    match /courses/{courseId} {
+      allow read: if true;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (request.auth.uid == resource.data.providerId || isAdmin());
+    }
+
+    // Conversations: Participants read/write
+    match /conversations/{conversationId} {
+      allow read, write: if request.auth != null && request.auth.uid in resource.data.participants;
+      allow create: if request.auth != null; // Refine this to check participants includes auth.uid
+      
+      // Messages subcollection
+      match /messages/{messageId} {
+        allow read, write: if request.auth != null; // Ideally check parent conversation participants
+      }
+    }
+
+    // Notifications: Recipient read, System/User create (trigger)
+    match /notifications/{notificationId} {
+      allow read: if request.auth != null && request.auth.uid == resource.data.recipientId;
+      allow write: if request.auth != null; // Allowing writes for now so users can "send" likes/connects
+    }
+  }
+}

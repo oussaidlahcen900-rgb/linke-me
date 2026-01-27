@@ -7,23 +7,23 @@ import { Search, MapPin, Filter, Plus, Loader2 } from "lucide-react";
 import { db } from "@/lib/firebase";
 import { collection, query, orderBy, onSnapshot } from "firebase/firestore";
 import { useAuth } from "@/context/AuthContext";
+import { Job } from "@/types";
 
 export default function JobsPage() {
-    const { user } = useAuth();
-    const [jobs, setJobs] = useState<any[]>([]);
+    useAuth();
+    const [jobs, setJobs] = useState<Job[]>([]);
     const [filterCity, setFilterCity] = useState("New York, NY");
     const [showPostForm, setShowPostForm] = useState(false);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Real-time listener for jobs
         const q = query(collection(db, "jobs"), orderBy("postedAt", "desc"));
 
         const unsubscribe = onSnapshot(q, (snapshot) => {
             const jobsData = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data(),
-            })) as any[]; // Cast as any first to avoid timestamp issues, usually safe
+            })) as Job[];
             setJobs(jobsData);
             setLoading(false);
         });
@@ -40,7 +40,7 @@ export default function JobsPage() {
         <div className="max-w-4xl mx-auto">
             <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold text-slate-900">Local Opportunities</h1>
+                    <h1 className="text-3xl font-bold text-slate-900 text-gradient bg-clip-text text-transparent">Local Opportunities</h1>
                     <p className="text-slate-500 mt-2">Find the best jobs in your area.</p>
                 </div>
 
