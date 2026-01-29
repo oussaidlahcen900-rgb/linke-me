@@ -43,70 +43,70 @@ export default function LandingPage() {
       </header>
 
       {/* Hero Section */}
-      <main className="flex-1 flex flex-col items-center justify-center text-center px-4 relative z-10 w-full h-full pb-20">
-        {/* Soft bottom fade to white */}
-        <div className="absolute inset-x-0 bottom-0 h-60 bg-gradient-to-t from-slate-50 to-transparent -z-10 pointer-events-none" />
+      <main className="flex-1 flex flex-col items-center justify-center text-center px-4 relative z-10 w-full h-full pb-8 md:pb-12 pt-20">
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          className="max-w-4xl w-full mx-auto"
-        >
-          <div className="glass p-8 md:p-12 rounded-3xl border border-white/20 shadow-2xl backdrop-blur-md bg-slate-900/30">
-            <h1 className="text-5xl font-extrabold tracking-tight text-white drop-shadow-xl sm:text-7xl leading-tight mb-6">
-              Connect locally. <br />
-              <GradientText from="from-cyan-300" via="via-blue-200" to="to-indigo-300" className="drop-shadow-sm">
-                Grow globally.
-              </GradientText>
-            </h1>
+        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="w-full mb-12"
+          >
+            <div className="glass p-8 md:p-12 rounded-3xl border border-white/20 shadow-2xl backdrop-blur-md bg-slate-900/30">
+              <h1 className="text-5xl font-extrabold tracking-tight text-white drop-shadow-xl sm:text-7xl leading-tight mb-6">
+                Connect locally. <br />
+                <GradientText from="from-cyan-300" via="via-blue-200" to="to-indigo-300" className="drop-shadow-sm">
+                  Grow globally.
+                </GradientText>
+              </h1>
 
-            <p className="text-xl text-white/90 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md mb-8">
-              The social platform for your city. Find jobs, join trainings, and discover services right next door.
-            </p>
+              <p className="text-xl text-white/90 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md mb-8">
+                The social platform for your city. Find jobs, join trainings, and discover services right next door.
+              </p>
 
-            <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link
-                href="/signup"
-                className="group relative px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] hover:shadow-[0_0_30px_rgba(37,99,235,0.7)] transition-all transform hover-bounce overflow-hidden"
-              >
-                <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
-                <span className="flex items-center gap-2 relative z-10">
-                  Join Your Community
-                  <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                </span>
-              </Link>
-              <Link
-                href="/feed"
-                className="px-8 py-4 text-white font-semibold glass rounded-full hover:bg-white/20 transition-all border border-white/30 shadow-lg hover:shadow-white/10 backdrop-blur-md hover:scale-105"
-              >
-                Explore as Guest
-              </Link>
+              <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                <Link
+                  href="/signup"
+                  className="group relative px-8 py-4 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] hover:shadow-[0_0_30px_rgba(37,99,235,0.7)] transition-all transform hover-bounce overflow-hidden"
+                >
+                  <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
+                  <span className="flex items-center gap-2 relative z-10">
+                    Join Your Community
+                    <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  </span>
+                </Link>
+                <Link
+                  href="/feed"
+                  className="px-8 py-4 text-white font-semibold glass rounded-full hover:bg-white/20 transition-all border border-white/30 shadow-lg hover:shadow-white/10 backdrop-blur-md hover:scale-105"
+                >
+                  Explore as Guest
+                </Link>
+              </div>
             </div>
-          </div>
-        </motion.div>
+          </motion.div>
+        </div>
 
-        {/* Features Grid Positioned at Bottom */}
-        <div className="absolute bottom-6 left-0 right-0 z-20 px-4">
+        {/* Features Grid - Now properly flowed in document */}
+        <div className="w-full px-4 pb-6 mt-auto">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto w-full">
             <FeatureCard
               icon={Briefcase}
               title="Local Jobs"
-              desc="Find opportunities in your area."
+              desc="Opportunities nearby."
               delay={0.2}
               color="blue"
             />
             <FeatureCard
               icon={Users}
               title="Community"
-              desc="Network with neighbors."
+              desc="Connect with neighbors."
               delay={0.4}
               color="purple"
             />
             <FeatureCard
               icon={GraduationCap}
               title="Training"
-              desc="Discover local workshops."
+              desc="Local workshops."
               delay={0.6}
               color="emerald"
             />
