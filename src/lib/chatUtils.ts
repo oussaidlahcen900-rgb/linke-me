@@ -45,3 +45,22 @@ export async function startConversation(currentUid: string, targetUid: string): 
     const newDocRef = await addDoc(conversationsRef, newConvoData);
     return newDocRef.id;
 }
+
+/**
+ * Updates the typing status of a user in a conversation.
+ */
+import { updateDoc, doc } from "firebase/firestore";
+
+export async function setTypingStatus(conversationId: string, userId: string, isTyping: boolean) {
+    if (!conversationId || !userId) return;
+
+    const convoRef = doc(db, "conversations", conversationId);
+
+    // Using dot notation to update nested field in the 'typing' map
+    await updateDoc(convoRef, {
+        [`typing.${userId}`]: {
+            isTyping,
+            lastTyped: serverTimestamp()
+        }
+    });
+}

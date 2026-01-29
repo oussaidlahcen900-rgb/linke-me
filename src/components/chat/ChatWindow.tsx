@@ -12,11 +12,19 @@ interface ChatWindowProps {
     onBack?: () => void;
 }
 
+import { uploadFile } from "@/lib/storageUtils";
+import { setTypingStatus } from "@/lib/chatUtils";
+import { Image as ImageIcon } from "lucide-react";
+
 export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     const { user } = useAuth();
     const [messages, setMessages] = useState<Message[]>([]);
     const [newMessage, setNewMessage] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
+    const [otherIsTyping, setOtherIsTyping] = useState(false);
+    const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
     const messagesEndRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const otherUid = conversation.participants.find(p => p !== user?.uid);
 
@@ -26,50 +34,98 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     };
 
     useEffect(() => {
-        if (!conversation.id) return;
+        if (!conversation.id || !otherUid) return;
 
+        // 1. Listen for Messages
         const q = query(
             collection(db, "conversations", conversation.id, "messages"),
             orderBy("createdAt", "asc")
         );
-
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        const unsubscribeMessages = onSnapshot(q, (snapshot) => {
             const msgs = snapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
             })) as Message[];
             setMessages(msgs);
-            // Mark as read could go here
-            setTimeout(scrollToBottom, 100);
+            setTimeout(scrollToBottom, 50);
         });
 
-        return () => unsubscribe();
-    }, [conversation.id]);
+        // 2. Listen for Typing Status (on the main conversation doc)
+        const convoRef = doc(db, "conversations", conversation.id);
+        const unsubscribeConvo = onSnapshot(convoRef, (snapshot) => {
+            const data = snapshot.data();
+            if (data?.typing && data.typing[otherUid]) {
+                const typingInfo = data.typing[otherUid];
+                const isTypingNow = typingInfo.isTyping;
+                // Optional: Check lastTyped timestamp to timeout stuck status
+                setOtherIsTyping(isTypingNow);
+            } else {
+                setOtherIsTyping(false);
+            }
+        });
 
-    const handleSend = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!newMessage.trim() || !user) return;
+        return () => {
+            unsubscribeMessages();
+            unsubscribeConvo();
+        };
+    }, [conversation.id, otherUid]);
+
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setNewMessage(e.target.value);
+
+        if (!conversation.id || !user) return;
+
+        // Debounce typing status
+        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+
+        setTypingStatus(conversation.id, user.uid, true);
+
+        typingTimeoutRef.current = setTimeout(() => {
+            setTypingStatus(conversation.id, user.uid, false);
+        }, 2000);
+    };
+
+    const handleSend = async (e?: React.FormEvent, imageUrl?: string) => {
+        if (e) e.preventDefault();
 
         const text = newMessage.trim();
+        if ((!text && !imageUrl) || !user) return;
+
         setNewMessage("");
+        setTypingStatus(conversation.id, user.uid, false); // Stop typing immediately
 
         const convoRef = doc(db, "conversations", conversation.id);
         const messagesRef = collection(convoRef, "messages");
 
         await addDoc(messagesRef, {
-            text,
+            text: text || (imageUrl ? "Sent an image" : ""),
+            imageUrl: imageUrl || null,
             senderId: user.uid,
             createdAt: serverTimestamp(),
             read: false
         });
 
-        // Update conversation summary
         await updateDoc(convoRef, {
-            lastMessage: text,
+            lastMessage: imageUrl ? "📷 Image" : text,
             lastMessageAt: serverTimestamp(),
-            // unreadCount logic would ideally be atomic increment for the OTHER user
             [`unreadCount.${otherUid}`]: (conversation.unreadCount?.[otherUid || ''] || 0) + 1
         });
+    };
+
+    const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !user) return;
+
+        setIsUploading(true);
+        try {
+            const path = `chat-images/${conversation.id}/${Date.now()}_${file.name}`;
+            const url = await uploadFile(file, path);
+            await handleSend(undefined, url);
+        } catch (error) {
+            console.error("Failed to upload image", error);
+        } finally {
+            setIsUploading(false);
+        }
     };
 
     return (
@@ -118,6 +174,13 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
                                     ? 'bg-blue-600 text-white rounded-tr-sm'
                                     : 'bg-white border border-slate-100 text-slate-800 rounded-tl-sm'}
                             `}>
+                                {msg.imageUrl && (
+                                    <img
+                                        src={msg.imageUrl}
+                                        alt="Sent image"
+                                        className="rounded-lg mb-2 max-w-full max-h-60 object-cover border border-white/20"
+                                    />
+                                )}
                                 {msg.text}
                                 <span className={`
                                     text-[10px] block text-right mt-1 opacity-70
@@ -129,18 +192,40 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
                         </div>
                     );
                 })}
+                {otherIsTyping && (
+                    <div className="flex justify-start animate-pulse">
+                        <div className="bg-slate-100 text-slate-500 text-xs px-4 py-2 rounded-full rounded-tl-none">
+                            User is typing...
+                        </div>
+                    </div>
+                )}
                 <div ref={messagesEndRef} />
             </div>
 
             {/* Input */}
             <div className="p-4 bg-white border-t border-slate-100">
-                <form onSubmit={handleSend} className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-full border border-slate-200 focus-within:ring-2 focus-within:ring-blue-100 transition">
+                <form onSubmit={(e) => handleSend(e)} className="flex items-center gap-2 bg-slate-50 p-1.5 rounded-full border border-slate-200 focus-within:ring-2 focus-within:ring-blue-100 transition">
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        accept="image/*"
+                        onChange={handleImageSelect}
+                    />
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={isUploading}
+                        className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-full transition"
+                    >
+                        <ImageIcon className="w-5 h-5" />
+                    </button>
                     <input
                         type="text"
                         value={newMessage}
-                        onChange={e => setNewMessage(e.target.value)}
+                        onChange={handleInputChange}
                         placeholder="Type a message..."
-                        className="flex-1 bg-transparent px-4 py-2 text-sm outline-none text-slate-700 placeholder:text-slate-400"
+                        className="flex-1 bg-transparent px-2 py-2 text-sm outline-none text-slate-700 placeholder:text-slate-400"
                     />
                     <button
                         type="submit"

@@ -1,14 +1,30 @@
 "use client";
 
 import { Bell, Search, MapPin, Menu, X, Home, Briefcase, Wrench, GraduationCap, User, MessageSquare } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import SearchBar from "@/components/layout/SearchBar";
 import { useAuth } from "@/context/AuthContext";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const { user, profile } = useAuth();
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        if (!user) return;
+        const q = query(
+            collection(db, "notifications"),
+            where("recipientId", "==", user.uid),
+            where("read", "==", false)
+        );
+        const unsubscribe = onSnapshot(q, (snapshot) => {
+            setUnreadCount(snapshot.size);
+        });
+        return () => unsubscribe();
+    }, [user]);
 
     const navItems = [
         { name: "My Feed", href: "/feed", icon: Home },
@@ -43,10 +59,12 @@ export default function Navbar() {
                     </button>
                 )}
 
-                <button className="relative rounded-full p-2 text-slate-500 hover:bg-slate-100">
+                <Link href="/notifications" className="relative rounded-full p-2 text-slate-500 hover:bg-slate-100 transition">
                     <Bell className="h-5 w-5" />
-                    <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
-                </button>
+                    {unreadCount > 0 && (
+                        <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white animate-pulse"></span>
+                    )}
+                </Link>
 
                 <Link href="/profile" className="h-8 w-8 overflow-hidden rounded-full bg-slate-200 ring-2 ring-white cursor-pointer hover:ring-blue-100 transition">
                     <img

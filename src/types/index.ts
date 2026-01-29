@@ -76,6 +76,7 @@ export interface Course {
 export interface Message {
     id: string;
     text: string;
+    imageUrl?: string;
     senderId: string;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createdAt: any;
