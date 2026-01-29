@@ -45,22 +45,22 @@ export default function LandingPage() {
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center text-center px-4 relative z-10 w-full h-full pb-8 md:pb-12 pt-20">
 
-        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
+        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-full mb-12"
+            className="w-full mb-16"
           >
-            <div className="glass p-8 md:p-12 rounded-3xl border border-white/20 shadow-2xl backdrop-blur-md bg-slate-900/30">
-              <h1 className="text-5xl font-extrabold tracking-tight text-white drop-shadow-xl sm:text-7xl leading-tight mb-6">
+            <div className="glass p-8 md:p-10 rounded-3xl border border-white/20 shadow-2xl backdrop-blur-md bg-slate-900/40">
+              <h1 className="text-4xl font-extrabold tracking-tight text-white drop-shadow-xl sm:text-6xl leading-tight mb-6">
                 Connect locally. <br />
                 <GradientText from="from-cyan-300" via="via-blue-200" to="to-indigo-300" className="drop-shadow-sm">
                   Grow globally.
                 </GradientText>
               </h1>
 
-              <p className="text-xl text-white/90 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md mb-8">
+              <p className="text-lg text-white/90 max-w-xl mx-auto font-medium leading-relaxed drop-shadow-md mb-8">
                 The social platform for your city. Find jobs, join trainings, and discover services right next door.
               </p>
 
