@@ -6,6 +6,8 @@ import { collection, query, where, orderBy, onSnapshot, addDoc, serverTimestamp 
 import { useAuth } from "@/context/AuthContext";
 import { Send, Loader2, User } from "lucide-react";
 import Link from "next/link";
+import Linkify from "@/components/ui/Linkify";
+import { formatRelativeTime } from "@/lib/dateUtils";
 
 interface Comment {
     id: string;
@@ -94,11 +96,10 @@ export default function CommentSection({ postId }: CommentSectionProps) {
                                         {comment.authorName}
                                     </Link>
                                     <span className="text-[10px] text-slate-400">
-                                        {/* Simple relative time placeholder */}
-                                        Just now
+                                        {formatRelativeTime(comment.createdAt)}
                                     </span>
                                 </div>
-                                <p className="text-sm text-slate-700 leading-relaxed break-words">{comment.text}</p>
+                                <Linkify text={comment.text} className="text-sm text-slate-700 leading-relaxed break-words block" />
                             </div>
                         </div>
                     ))

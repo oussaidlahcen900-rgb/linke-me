@@ -19,8 +19,11 @@ export default function PostJobForm({ onSuccess }: { onSuccess: () => void }) {
         contactEmail: ""
     });
 
+    const [error, setError] = useState("");
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
         if (!user) return;
         setLoading(true);
 
@@ -33,7 +36,7 @@ export default function PostJobForm({ onSuccess }: { onSuccess: () => void }) {
             onSuccess();
         } catch (error) {
             console.error("Error posting job:", error);
-            alert("Failed to post job.");
+            setError("Failed to post job. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -46,6 +49,12 @@ export default function PostJobForm({ onSuccess }: { onSuccess: () => void }) {
     return (
         <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
             <h3 className="font-bold text-lg text-slate-800 mb-2">Post a New Job</h3>
+
+            {error && (
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
+                    {error}
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>

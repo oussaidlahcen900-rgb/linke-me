@@ -4,9 +4,11 @@ import { Bell, Search, MapPin, Menu, X, Home, Briefcase, Wrench, GraduationCap, 
 import { useState } from "react";
 import Link from "next/link";
 import SearchBar from "@/components/layout/SearchBar";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const { user, profile } = useAuth();
 
     const navItems = [
         { name: "My Feed", href: "/feed", icon: Home },
@@ -26,7 +28,7 @@ export default function Navbar() {
                 >
                     {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
                 </button>
-                <span className="text-xl font-bold text-blue-600">LinkeMe</span>
+                <Link href="/feed" className="text-xl font-bold text-blue-600">LinkeMe</Link>
             </div>
 
             <div className="hidden max-w-md flex-1 lg:block">
@@ -34,19 +36,25 @@ export default function Navbar() {
             </div>
 
             <div className="flex items-center gap-2 md:gap-4">
-                <button className="hidden md:flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
-                    <MapPin className="h-4 w-4 text-blue-500" />
-                    <span>New York, NY</span>
-                </button>
+                {profile?.city && (
+                    <button className="hidden md:flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50">
+                        <MapPin className="h-4 w-4 text-blue-500" />
+                        <span>{profile.city}</span>
+                    </button>
+                )}
 
                 <button className="relative rounded-full p-2 text-slate-500 hover:bg-slate-100">
                     <Bell className="h-5 w-5" />
                     <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white"></span>
                 </button>
 
-                <div className="h-8 w-8 overflow-hidden rounded-full bg-slate-200 ring-2 ring-white">
-                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Felix" alt="User" />
-                </div>
+                <Link href="/profile" className="h-8 w-8 overflow-hidden rounded-full bg-slate-200 ring-2 ring-white cursor-pointer hover:ring-blue-100 transition">
+                    <img
+                        src={profile?.photoURL || `https://api.dicebear.com/7.x/initials/svg?seed=${profile?.displayName || user?.email || 'User'}`}
+                        alt={profile?.displayName || "User"}
+                        className="w-full h-full object-cover"
+                    />
+                </Link>
             </div>
 
             {/* Mobile Menu Overlay */}
@@ -63,12 +71,14 @@ export default function Navbar() {
                             <span className="font-medium">{item.name}</span>
                         </Link>
                     ))}
-                    <div className="mt-4 pt-4 border-t border-slate-100">
-                        <button className="flex items-center gap-2 px-4 py-3 text-slate-600 w-full">
-                            <MapPin className="h-5 w-5 text-blue-500" />
-                            <span className="font-medium">New York, NY</span>
-                        </button>
-                    </div>
+                    {profile?.city && (
+                        <div className="mt-4 pt-4 border-t border-slate-100">
+                            <button className="flex items-center gap-2 px-4 py-3 text-slate-600 w-full">
+                                <MapPin className="h-5 w-5 text-blue-500" />
+                                <span className="font-medium">{profile.city}</span>
+                            </button>
+                        </div>
+                    )}
                 </div>
             )}
         </header>

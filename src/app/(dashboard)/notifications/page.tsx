@@ -8,6 +8,7 @@ import { Heart, MessageSquare, UserPlus, Bell } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { Timestamp } from "firebase/firestore";
+import { formatDistanceToNow } from "date-fns";
 
 // Types
 interface Notification {
@@ -178,8 +179,7 @@ export default function NotificationsPage() {
                                     )}
                                 </div>
                                 <p className="text-xs text-slate-400 mt-1">
-                                    {/* Ideally use a real relative time library like date-fns */}
-                                    Just now
+                                    {n.createdAt?.toDate ? formatDistanceToNow(n.createdAt.toDate(), { addSuffix: true }) : "Just now"}
                                 </p>
                             </div>
                         </div>

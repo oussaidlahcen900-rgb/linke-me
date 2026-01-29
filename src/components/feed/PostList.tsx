@@ -53,6 +53,15 @@ export default function PostList({ userId }: { userId?: string }) {
         );
     }
 
+    if (!loading && posts.length === 0) {
+        return (
+            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
+                <p className="text-slate-500 font-medium">No posts yet.</p>
+                <p className="text-slate-400 text-sm mt-1">Be the first to share something!</p>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-4">
             {posts.map((post) => (
@@ -63,13 +72,13 @@ export default function PostList({ userId }: { userId?: string }) {
                         authorId: post.authorId,
                         authorName: post.authorName,
                         authorAvatar: post.authorAvatar,
-                        authorRole: "Member", // Placeholder as Post type doesn't have role yet
-                        authorCity: "Casablanca", // Placeholder
+                        authorRole: "Member",
+                        authorCity: "Casablanca",
                         text: post.text,
                         imageUrl: post.imageUrl,
                         likes: post.likes,
                         createdAt: post.createdAt,
-                        likedBy: [] // We might need to fetch this or add to Post type
+                        likedBy: []
                     }}
                 />
             ))}

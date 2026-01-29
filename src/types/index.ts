@@ -2,11 +2,14 @@ export interface UserProfile {
     uid: string;
     displayName?: string;
     email?: string;
-    role?: string; // "admin" | "moderator" | "user"
+    role?: 'owner' | 'admin' | 'user'; // Hierarchy: Owner > Admin > User
+    isVerified?: boolean; // Blue checkmark status
     city?: string;
     photoURL?: string;
     headline?: string;
     bio?: string;
+    skills?: string[];
+    experience?: string;
     socialLinks?: {
         linkedin?: string;
         github?: string;
@@ -22,6 +25,7 @@ export interface Post {
     authorId: string;
     authorName: string;
     authorAvatar: string;
+    authorVerified?: boolean; // Snapshot of verification status
     likes: number;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     createdAt: any; // Firestore Timestamp
@@ -35,6 +39,7 @@ export interface Job {
     salary?: string;
     description: string;
     authorId: string;
+    authorVerified?: boolean; // Snapshot
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     postedAt: any; // Firestore Timestamp or string for display
     contactEmail?: string;

@@ -27,13 +27,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+        const unsubscribeAuth = onAuthStateChanged(auth, (user) => {
             setUser(user);
             if (user) {
-                // Dynamic import to avoid circular dependencies or server-side issues if any
-                import("firebase/firestore").then(({ doc, getDoc }) => {
+                // Subscribe to profile changes
+                import("firebase/firestore").then(({ doc, onSnapshot }) => {
                     import("@/lib/firebase").then(({ db }) => {
-                        getDoc(doc(db, "users", user.uid)).then((snap) => {
+                        const unsubProfile = onSnapshot(doc(db, "users", user.uid), (snap) => {
                             if (snap.exists()) {
                                 setProfile(snap.data() as UserProfile);
                             } else {
@@ -41,6 +41,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                             }
                             setLoading(false);
                         });
+                        // Cleanup profile listener when auth user changes
+                        return () => unsubProfile();
                     });
                 });
             } else {
@@ -49,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
         });
 
-        return () => unsubscribe();
+        return () => unsubscribeAuth();
     }, []);
 
     const signOut = async () => {

@@ -19,12 +19,15 @@ export default function PostServiceForm({ onSuccess }: { onSuccess: () => void }
         contactPhone: ""
     });
 
+    const [error, setError] = useState("");
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
         if (!user) return;
 
         setLoading(true);
@@ -46,7 +49,7 @@ export default function PostServiceForm({ onSuccess }: { onSuccess: () => void }
             onSuccess();
         } catch (error) {
             console.error("Error posting service:", error);
-            alert("Failed to post service. Please try again.");
+            setError("Failed to post service. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -59,6 +62,12 @@ export default function PostServiceForm({ onSuccess }: { onSuccess: () => void }
 
     return (
         <form onSubmit={handleSubmit} className="space-y-4 bg-slate-50 p-4 rounded-xl border border-slate-100">
+            {error && (
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
+                    {error}
+                </div>
+            )}
+
             <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Service Title</label>
                 <input

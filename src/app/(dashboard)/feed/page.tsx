@@ -1,39 +1,50 @@
+"use client";
+
 import CreatePost from "@/components/feed/CreatePost";
 import PostList from "@/components/feed/PostList";
-import { MapPin, Briefcase } from "lucide-react";
+import { MapPin, Briefcase, ShieldCheck } from "lucide-react"; // Import ShieldCheck for Admin link if needed, but here we need Badge
+import { useAuth } from "@/context/AuthContext";
+import { VerificationBadge } from "@/components/ui/VerificationBadge";
+import Link from "next/link"; // For linking to profile
 
 export default function FeedPage() {
+    const { user, profile } = useAuth();
+
     return (
-        <div className="max-w-6xl mx-auto px-4 py-8 flex gap-6">
+        <div className="max-w-7xl mx-auto px-4 py-8 flex gap-8">
             {/* Sidebar - Profile Summary */}
-            <aside className="hidden md:block w-72 space-y-4">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 text-center">
-                    <div className="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-3 overflow-hidden">
-                        {/* Placeholder for User Avatar */}
+            <aside className="hidden md:block w-72 space-y-4 flex-shrink-0">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-100 text-center sticky top-24">
+                    <div className="w-20 h-20 bg-slate-100 rounded-full mx-auto mb-3 overflow-hidden border-2 border-white shadow-sm">
                         <img
-                            src="https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"
+                            src={profile?.photoURL || user?.photoURL || "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest"}
                             alt="Profile"
                             className="w-full h-full object-cover"
                         />
                     </div>
-                    <h2 className="font-bold text-lg text-slate-800">Guest User</h2>
-                    <p className="text-sm text-slate-500 mb-4">Software Engineer</p>
+                    <Link href="/profile" className="hover:underline">
+                        <h2 className="font-bold text-lg text-slate-800 flex items-center justify-center gap-1">
+                            {profile?.displayName || user?.displayName || "Guest User"}
+                            {profile?.isVerified && <VerificationBadge size={16} />}
+                        </h2>
+                    </Link>
+                    <p className="text-sm text-slate-500 mb-4">{profile?.headline || "Welcome to Linke-Me"}</p>
 
                     <div className="text-left space-y-2 text-sm text-slate-600 border-t border-slate-50 pt-4">
                         <div className="flex items-center gap-2">
                             <MapPin className="w-4 h-4 text-slate-400" />
-                            <span>Casablanca, Morocco</span>
+                            <span>{profile?.city || "Unknown Location"}</span>
                         </div>
                         <div className="flex items-center gap-2">
                             <Briefcase className="w-4 h-4 text-slate-400" />
-                            <span>Open to work</span>
+                            <span>{profile?.role === 'owner' ? 'Owner' : (profile?.role === 'admin' ? 'Admin' : 'Member')}</span>
                         </div>
                     </div>
                 </div>
             </aside>
 
             {/* Main Content - Feed */}
-            <main className="flex-1 max-w-2xl">
+            <main className="flex-1 min-w-0">
                 <CreatePost />
                 <PostList />
             </main>

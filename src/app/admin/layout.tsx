@@ -14,13 +14,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         if (!loading) {
             if (!user) {
                 router.push("/login");
-            } else if (profile?.role !== "admin") {
+            } else if (profile?.role !== "admin" && profile?.role !== "owner") {
                 router.push("/feed"); // Redirect non-admins to feed
             }
         }
     }, [user, profile, loading, router]);
 
-    if (loading || !profile || profile.role !== "admin") {
+    if (loading || !profile || (profile.role !== "admin" && profile.role !== "owner")) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50">
                 <Loader2 className="w-8 h-8 animate-spin text-blue-600" />

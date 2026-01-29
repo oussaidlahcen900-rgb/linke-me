@@ -96,7 +96,9 @@ export default function JobsPage() {
                     ))
                 ) : (
                     <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
-                        <p className="text-slate-500">No jobs found in this location.</p>
+                        <Search className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                        <h3 className="text-lg font-semibold text-slate-700">No jobs found</h3>
+                        <p className="text-slate-500">Try adjusting your search or filters.</p>
                         <button
                             onClick={() => setFilterCity("")}
                             className="mt-2 text-blue-600 font-medium hover:underline"

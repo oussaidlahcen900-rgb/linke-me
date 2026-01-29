@@ -8,6 +8,7 @@ import { BookOpen, Building, MapPin, Calendar, Clock, DollarSign, Loader2 } from
 
 export default function PostCourseForm({ onSuccess }: { onSuccess: () => void }) {
     const { user } = useAuth();
+    const [error, setError] = useState("");
     const [loading, setLoading] = useState(false);
     const [formData, setFormData] = useState({
         title: "",
@@ -21,6 +22,7 @@ export default function PostCourseForm({ onSuccess }: { onSuccess: () => void })
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setError("");
         if (!user) return;
         setLoading(true);
 
@@ -33,6 +35,7 @@ export default function PostCourseForm({ onSuccess }: { onSuccess: () => void })
             onSuccess();
         } catch (error) {
             console.error("Error posting course:", error);
+            setError("Failed to post course. Please try again.");
         } finally {
             setLoading(false);
         }
@@ -45,6 +48,12 @@ export default function PostCourseForm({ onSuccess }: { onSuccess: () => void })
     return (
         <form onSubmit={handleSubmit} className="space-y-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
             <h3 className="font-bold text-lg text-slate-800 mb-2">Add a Training / Course</h3>
+
+            {error && (
+                <div className="bg-red-50 text-red-600 text-sm p-3 rounded-lg border border-red-100">
+                    {error}
+                </div>
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -102,7 +111,7 @@ export default function PostCourseForm({ onSuccess }: { onSuccess: () => void })
                 <textarea name="description" required value={formData.description} onChange={handleChange} className="w-full p-3 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-100 min-h-[80px]" placeholder="What will be taught?" />
             </div>
 
-            <button type="submit" disabled={loading} className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md flex items-center justify-center gap-2">
+            <button type="submit" disabled={loading} className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg shadow-md flex items-center justify-center gap-2 disabled:opacity-70 disabled:cursor-not-allowed">
                 {loading ? <Loader2 className="animate-spin w-4 h-4" /> : "List Course"}
             </button>
         </form>

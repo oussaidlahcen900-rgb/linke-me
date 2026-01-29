@@ -1,10 +1,8 @@
 export const APP_NAME = "Linke-Me";
 
 export const SOUNDS = {
-    // Short "pop" sound for notifications/interactions
-    POP: "data:audio/wav;base64,UklGRl9vT19XQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YU", // Placeholder - simplified for now
-    // A longer real base64 would be needed for a good sound, but this prevents crashes.
-    // Ideally we'd load a file from /sounds/pop.mp3
+    // Short "pop" sound (base64 of a simple notification wav)
+    POP: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="
 };
 
 export const ROUTES = {

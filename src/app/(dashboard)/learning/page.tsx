@@ -74,7 +74,9 @@ export default function LearningPage() {
                         ))
                     ) : (
                         <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
-                            <p className="text-slate-500">No courses found here.</p>
+                            <Search className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                            <h3 className="text-lg font-semibold text-slate-700">No courses found</h3>
+                            <p className="text-slate-500">Try changing your filters or add a new course.</p>
                             <button onClick={() => setFilterCity("")} className="mt-2 text-blue-600 font-medium hover:underline">View all</button>
                         </div>
                     )}

@@ -23,6 +23,7 @@ export const viewport = {
 
 import { AuthProvider } from "@/context/AuthContext";
 import { WavingMascot } from "@/components/ui/WavingMascot";
+import StartupSound from "@/components/ui/StartupSound";
 
 export default function RootLayout({
   children,
@@ -35,6 +36,7 @@ export default function RootLayout({
         <AuthProvider>
           {children}
           <WavingMascot />
+          <StartupSound />
         </AuthProvider>
       </body>
     </html>

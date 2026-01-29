@@ -8,6 +8,9 @@ import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import { useState } from "react";
 import CommentSection from "./CommentSection";
+import { VerificationBadge } from "@/components/ui/VerificationBadge";
+import Linkify from "@/components/ui/Linkify";
+import { formatRelativeTime } from "@/lib/dateUtils";
 
 interface PostProps {
     id: string;
@@ -21,6 +24,7 @@ interface PostProps {
     likes: number;
     createdAt: any;
     likedBy?: string[];
+    authorVerified?: boolean;
 }
 
 export default function PostCard({ post }: { post: PostProps }) {
@@ -69,9 +73,33 @@ export default function PostCard({ post }: { post: PostProps }) {
         }
     };
 
+    const handleShare = async () => {
+        const shareUrl = `${window.location.origin}/post/${post.id}`;
+        const shareData = {
+            title: `Post by ${post.authorName} on Linke-Me`,
+            text: post.text.substring(0, 50) + "...",
+            url: shareUrl
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.log("Share canceled", err);
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(shareUrl);
+                alert("Link copied to clipboard!");
+            } catch (err) {
+                console.error("Failed to copy link", err);
+            }
+        }
+    };
+
     return (
         <div className="card mb-4 transition-all duration-300 hover:shadow-md">
-            {/* Header */}
+            {/* ... */}
             <div className="flex items-start justify-between mb-4">
                 <div className="flex gap-3">
                     <Link href={`/profile?uid=${post.authorId}`}>
@@ -81,13 +109,15 @@ export default function PostCard({ post }: { post: PostProps }) {
                             className="w-12 h-12 rounded-full object-cover border border-slate-100"
                         />
                     </Link>
+
                     <div>
-                        <Link href={`/profile?uid=${post.authorId}`} className="font-semibold text-slate-900 hover:underline">
+                        <Link href={`/profile?uid=${post.authorId}`} className="font-semibold text-slate-900 hover:underline flex items-center gap-1">
                             {post.authorName}
+                            {post.authorVerified && <VerificationBadge size={14} />}
                         </Link>
                         {post.authorRole && <p className="text-xs text-slate-500">{post.authorRole}</p>}
                         <div className="flex items-center gap-1 text-xs text-slate-400 mt-0.5">
-                            <span>Just now</span> {/* Placeholder timestamp */}
+                            <span>{formatRelativeTime(post.createdAt)}</span>
                             {post.authorCity && (
                                 <>
                                     <span>•</span>
@@ -104,7 +134,7 @@ export default function PostCard({ post }: { post: PostProps }) {
 
             {/* Content */}
             <div className="mb-4">
-                <p className="text-slate-700 whitespace-pre-line">{post.text}</p>
+                <Linkify text={post.text} className="text-slate-700 whitespace-pre-line block" />
                 {post.imageUrl && (
                     <img
                         src={post.imageUrl}
@@ -132,7 +162,10 @@ export default function PostCard({ post }: { post: PostProps }) {
                     {/* <span className="text-sm">Comments</span> */}
                 </button>
 
-                <button className="flex items-center gap-2 text-slate-500 hover:text-green-600 transition">
+                <button
+                    onClick={handleShare}
+                    className="flex items-center gap-2 text-slate-500 hover:text-green-600 transition"
+                >
                     <Share2 className="w-5 h-5" />
                     <span className="text-sm">Share</span>
                 </button>

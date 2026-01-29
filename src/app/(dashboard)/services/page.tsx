@@ -68,7 +68,7 @@ export default function ServicesPage() {
                                 <Wrench className="w-8 h-8 text-slate-300 animate-spin" />
                             </div>
                         ) : services.length === 0 ? (
-                            <div className="text-center py-12 bg-white rounded-xl border border-slate-100 shadow-sm">
+                            <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
                                 <Wrench className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                                 <h3 className="text-lg font-semibold text-slate-700">No services yet</h3>
                                 <p className="text-slate-500">Be the first to offer a service in your area!</p>
