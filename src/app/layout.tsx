@@ -19,11 +19,16 @@ export const metadata: Metadata = {
 
 export const viewport = {
   themeColor: "#2563EB",
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false, // Prevents zooming on inputs, more app-like
 };
 
 import { AuthProvider } from "@/context/AuthContext";
 import { WavingMascot } from "@/components/ui/WavingMascot";
 import StartupSound from "@/components/ui/StartupSound";
+import InstallPrompt from "@/components/pwa/InstallPrompt";
 
 export default function RootLayout({
   children,
@@ -37,6 +42,7 @@ export default function RootLayout({
           {children}
           <WavingMascot />
           <StartupSound />
+          <InstallPrompt />
         </AuthProvider>
       </body>
     </html>

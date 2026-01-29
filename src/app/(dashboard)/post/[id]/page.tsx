@@ -8,6 +8,8 @@ import PostCard from "@/components/feed/PostCard";
 import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
+export const dynamic = "force-dynamic";
+
 export default function SinglePostPage() {
     const params = useParams();
     const router = useRouter();
