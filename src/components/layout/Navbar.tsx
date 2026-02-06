@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Search, MapPin, Menu, X, Home, Briefcase, Wrench, GraduationCap, User, MessageSquare } from "lucide-react";
+import { Bell, Search, MapPin, Menu, X, Home, Briefcase, Wrench, GraduationCap, User, MessageSquare, LogOut } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import SearchBar from "@/components/layout/SearchBar";
@@ -10,7 +10,7 @@ import { db } from "@/lib/firebase";
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const { user, profile } = useAuth();
+    const { user, profile, signOut } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
@@ -59,6 +59,10 @@ export default function Navbar() {
                     </button>
                 )}
 
+                <Link href="/chat" className="relative rounded-full p-2 text-slate-500 hover:bg-slate-100 transition group" title="Messages">
+                    <MessageSquare className="h-5 w-5" />
+                </Link>
+
                 <Link href="/notifications" className="relative rounded-full p-2 text-slate-500 hover:bg-slate-100 transition">
                     <Bell className="h-5 w-5" />
                     {unreadCount > 0 && (
@@ -97,8 +101,20 @@ export default function Navbar() {
                             </button>
                         </div>
                     )}
+                    <div className="mt-2 pt-2 border-t border-slate-100">
+                        <button
+                            onClick={() => {
+                                signOut();
+                                setIsMobileMenuOpen(false);
+                            }}
+                            className="flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition w-full text-left"
+                        >
+                            <LogOut className="h-5 w-5" />
+                            <span className="font-medium">Sign Out</span>
+                        </button>
+                    </div>
                 </div>
             )}
-        </header>
+        </header >
     );
 }

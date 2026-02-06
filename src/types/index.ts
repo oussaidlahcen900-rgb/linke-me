@@ -16,6 +16,12 @@ export interface UserProfile {
         twitter?: string;
         website?: string;
     };
+    friends?: string[]; // Array of UIDs
+    friendRequests?: {
+        uid: string;
+        status: 'pending' | 'accepted' | 'rejected';
+        timestamp: any;
+    }[];
 }
 
 export interface Post {

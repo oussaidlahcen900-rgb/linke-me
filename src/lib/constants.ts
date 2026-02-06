@@ -1,8 +1,8 @@
 export const APP_NAME = "Linke-Me";
 
 export const SOUNDS = {
-    // Short "pop" sound (base64 of a simple notification wav)
-    POP: "data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQAAAAA="
+    // Short "pop" sound
+    POP: "https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3"
 };
 
 export const ROUTES = {
@@ -17,4 +17,4 @@ export const ROUTES = {
     SIGNUP: "/signup",
 };
 
-export const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/avataaars/svg?seed=Guest";
+export const DEFAULT_AVATAR = "https://api.dicebear.com/7.x/avataaars/svg?seed=User";

@@ -13,6 +13,8 @@ interface ChatListProps {
     selectedId?: string;
 }
 
+import { BOT_ID, getUserProfile } from "@/lib/chatUtils";
+
 export default function ChatList({ onSelect, selectedId }: ChatListProps) {
     const { user } = useAuth();
     const [conversations, setConversations] = useState<Conversation[]>([]);
@@ -34,27 +36,28 @@ export default function ChatList({ onSelect, selectedId }: ChatListProps) {
                 const data = doc.data() as Omit<Conversation, "id">;
                 const otherUid = data.participants.find(p => p !== user.uid);
 
-                // Fetch other user profile (simple cache-less invite for MVP)
-                // In production, use a user cache or separate profiles collection
-                const otherUser = { displayName: "Unknown", photoURL: "", uid: otherUid || "" };
+                let otherUser = { displayName: "Unknown User", photoURL: "", uid: otherUid || "" };
 
                 if (otherUid) {
-                    // We can't really async fetch inside map for real-time efficiency without cache
-                    // For now, we'll just store UID or fetch if critical. 
-                    // Better approach: Store essential user info IN the conversation document 
-                    // to avoid N+1 queries. Let's assume we do that or just show UID for now 
-                    // until we add user-sync to conversations.
-                    // Or, we'll try to fetch it here - it's okay for < 50 chats.
-                    // (Omitting fetch for brevity/performance in this block, will rely on what's available
-                    // or implement a quick lookup if needed. For this demo, let's assume we have a helper 
-                    // or just use a placeholder).
-                    // Actually, let's do a quick fetch or listen.
+                    // Fetch real profile
+                    try {
+                        const profile = await getUserProfile(otherUid);
+                        if (profile) {
+                            otherUser = {
+                                displayName: profile.displayName || "Unknown User",
+                                photoURL: profile.photoURL || "",
+                                uid: otherUid
+                            };
+                        }
+                    } catch (error) {
+                        console.error("Error fetching profile:", error);
+                    }
                 }
 
                 return {
                     id: doc.id,
                     ...data,
-                    otherUser // Placeholder, will populate properly in a real app or with stored data
+                    otherUser
                 };
             });
 

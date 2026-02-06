@@ -26,7 +26,7 @@ export const viewport = {
 };
 
 import { AuthProvider } from "@/context/AuthContext";
-import { WavingMascot } from "@/components/ui/WavingMascot";
+import { LanguageProvider } from "@/context/LanguageContext";
 import StartupSound from "@/components/ui/StartupSound";
 import InstallPrompt from "@/components/pwa/InstallPrompt";
 
@@ -39,10 +39,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${inter.variable} antialiased bg-slate-50 text-slate-900`}>
         <AuthProvider>
-          {children}
-          <WavingMascot />
-          <StartupSound />
-          <InstallPrompt />
+          <LanguageProvider>
+            {children}
+            <StartupSound />
+            <InstallPrompt />
+          </LanguageProvider>
         </AuthProvider>
       </body>
     </html>

@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Briefcase, CheckCircle, BookOpen, User, Bell, ShieldCheck } from "lucide-react";
+import { Home, Briefcase, CheckCircle, BookOpen, User, Bell, ShieldCheck, LogOut, Users } from "lucide-react";
 import clsx from "clsx";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -11,7 +11,7 @@ import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const { user, profile } = useAuth(); // Get profile for role check
+    const { user, profile, signOut } = useAuth(); // Get profile for role check
     const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
@@ -38,6 +38,7 @@ export default function Sidebar() {
             icon: Bell,
             badge: unreadCount > 0 ? unreadCount : undefined
         },
+        { name: "My Network", href: "/network", icon: Users },
         { name: "My Profile", href: "/profile", icon: User },
         // Admin Link (Conditional)
         ...((profile?.role === 'admin' || profile?.role === 'owner') ? [{
@@ -88,7 +89,15 @@ export default function Sidebar() {
             </nav>
             {/* User footer... */}
             <div className="p-4 border-t border-slate-100">
-                {/* ... */}
+                <button
+                    onClick={() => signOut()}
+                    className="flex items-center gap-3 w-full px-4 py-3 text-slate-600 hover:bg-red-50 hover:text-red-600 rounded-xl transition-all duration-300 group"
+                >
+                    <div className="transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
+                        <LogOut className="w-5 h-5 text-slate-400 group-hover:text-red-500" />
+                    </div>
+                    <span className="font-medium">Sign Out</span>
+                </button>
             </div>
         </aside>
     );
