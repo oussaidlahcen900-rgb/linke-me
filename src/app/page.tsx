@@ -57,31 +57,31 @@ export default function LandingPage() {
       {/* Hero Section */}
       <main className="flex-1 flex flex-col items-center justify-center text-center px-4 relative z-10 w-full h-full pb-8 md:pb-12 pt-20">
 
-        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-4xl mx-auto">
+        <div className="flex-1 flex flex-col items-center justify-center w-full max-w-3xl mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut" }}
-            className="w-full mb-12"
+            className="w-full mb-10"
           >
-            <div className="glass p-6 md:p-10 rounded-3xl border border-white/20 shadow-2xl backdrop-blur-md bg-slate-900/40">
-              <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-white drop-shadow-xl leading-tight mb-4 whitespace-pre-line">
+            <div className="glass p-5 md:p-8 rounded-3xl border border-white/20 shadow-2xl backdrop-blur-md bg-slate-900/40">
+              <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight text-white drop-shadow-xl leading-tight mb-3 whitespace-pre-line">
                 {t('heroTitle')}
               </h1>
 
-              <p className="text-base md:text-lg text-white/90 max-w-xl mx-auto font-medium leading-relaxed drop-shadow-md mb-8">
+              <p className="text-sm md:text-base text-white/90 max-w-lg mx-auto font-medium leading-relaxed drop-shadow-md mb-6">
                 {t('heroSubtitle')}
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link
                   href="/signup"
-                  className="group relative px-8 py-3.5 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] hover:shadow-[0_0_30px_rgba(37,99,235,0.7)] transition-all transform hover-bounce overflow-hidden text-sm md:text-base"
+                  className="group relative px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white font-bold rounded-full shadow-[0_0_20px_rgba(37,99,235,0.5)] hover:shadow-[0_0_30px_rgba(37,99,235,0.7)] transition-all transform hover-bounce overflow-hidden text-sm"
                 >
                   <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:animate-[shimmer_1.5s_infinite]"></div>
                   <span className="flex items-center gap-2 relative z-10">
                     {t('joinCommunity')}
-                    <ArrowRight className={`w-4 h-4 md:w-5 md:h-5 transition-transform ${direction === 'rtl' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} />
+                    <ArrowRight className={`w-4 h-4 transition-transform ${direction === 'rtl' ? 'group-hover:-translate-x-1 rotate-180' : 'group-hover:translate-x-1'}`} />
                   </span>
                 </Link>
 
