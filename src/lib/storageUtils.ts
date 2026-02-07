@@ -7,7 +7,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
  * @param maxWidth The maximum width (default 1200px).
  * @param quality The JPEG quality (0-1).
  */
-const compressImage = (file: File, maxWidth = 1200, quality = 0.8): Promise<Blob> => {
+const compressImage = (file: File, maxWidth = 1024, quality = 0.7): Promise<Blob> => {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
         reader.readAsDataURL(file);

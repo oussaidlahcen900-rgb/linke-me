@@ -3,18 +3,17 @@
 import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/context/AuthContext";
 import { db } from "@/lib/firebase";
-import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, setDoc, deleteDoc } from "firebase/firestore";
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp, updateDoc, doc, deleteDoc } from "firebase/firestore";
 import { Conversation, Message } from "@/types";
-import { Send, ArrowLeft, MoreVertical, Phone, Video, Trash2, Edit2, X, Image as ImageIcon } from "lucide-react";
+import { Send, ArrowLeft, MoreVertical, Trash2, Edit2, X, Image as ImageIcon, Check, CheckCheck } from "lucide-react";
+
+import { uploadFile } from "@/lib/storageUtils";
+import { setTypingStatus, BOT_ID, getUserProfile, getBotReply } from "@/lib/chatUtils";
 
 interface ChatWindowProps {
     conversation: Conversation;
     onBack?: () => void;
 }
-
-import { uploadFile } from "@/lib/storageUtils";
-import { setTypingStatus } from "@/lib/chatUtils";
-import { BOT_ID, getUserProfile, getBotReply } from "@/lib/chatUtils";
 
 export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     const { user } = useAuth();
@@ -23,6 +22,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     const [isUploading, setIsUploading] = useState(false);
     const [otherIsTyping, setOtherIsTyping] = useState(false);
     const [showMenu, setShowMenu] = useState(false);
+    const [lastReadByOther, setLastReadByOther] = useState<any>(null); // Timestamp
 
     // Edit/Delete State
     const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
@@ -35,14 +35,11 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
 
     const otherUid = conversation.participants.find(p => p !== user?.uid);
 
-    // Bot Auto-Reply Logic ... (unchanged)
+    // Bot Auto-Reply Logic
     useEffect(() => {
         if (!otherUid || otherUid !== BOT_ID || messages.length === 0) return;
         const lastMsg = messages[messages.length - 1];
-        if (lastMsg.senderId === user?.uid && !editingMessageId) { // Don't reply if user is just editing
-            // ... existing bot logic
-            // (Simplified for brevity in this replace, ensuring we don't duplicate logic if not needed to change)
-            // Keeping the original logic structure but adding the check.
+        if (lastMsg.senderId === user?.uid && !editingMessageId) {
             setOtherIsTyping(true);
             const timer = setTimeout(async () => {
                 const reply = getBotReply(lastMsg.text);
@@ -57,7 +54,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
                     [`unreadCount.${user?.uid}`]: (conversation.unreadCount?.[user?.uid || ''] || 0) + 1
                 });
                 setOtherIsTyping(false);
-            }, 1000 + Math.random() * 1000); // Natural delay
+            }, 1000 + Math.random() * 1000);
             return () => clearTimeout(timer);
         }
     }, [messages, otherUid, conversation.id, user, conversation.unreadCount, editingMessageId]);
@@ -67,6 +64,7 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
     };
 
+    // Listen for Messages
     useEffect(() => {
         if (!conversation.id || !otherUid) return;
         const q = query(
@@ -76,24 +74,47 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         const unsubscribeMessages = onSnapshot(q, (snapshot) => {
             const msgs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Message[];
             setMessages(msgs);
-            // Only auto-scroll if we are near bottom or it's initial load
-            // For simplicity, scrolling on every new message
             setTimeout(scrollToBottom, 50);
         });
+        return () => unsubscribeMessages();
+    }, [conversation.id, otherUid]);
 
-        // Listen for Typing Status (unchanged)
+    // Listen for Conversation Metadata (Typing & Read Receipt)
+    useEffect(() => {
+        if (!conversation.id || !user || !otherUid) return;
         const convoRef = doc(db, "conversations", conversation.id);
+
+        // 1. Mark as Read immediately when opening
+        const markAsRead = async () => {
+            await updateDoc(convoRef, {
+                [`unreadCount.${user.uid}`]: 0,
+                [`readStatus.${user.uid}`]: serverTimestamp()
+            });
+        };
+        markAsRead();
+
         const unsubscribeConvo = onSnapshot(convoRef, (snapshot) => {
             const data = snapshot.data();
+
+            // Typing Logic with Timeout Prevention
             if (data?.typing && data.typing[otherUid]) {
-                setOtherIsTyping(data.typing[otherUid].isTyping);
+                const typingData = data.typing[otherUid];
+                const now = Date.now();
+                // Check if lastTyped was within 10 seconds (in case they crashed)
+                const isRecent = typingData.lastTyped?.toMillis ? (now - typingData.lastTyped.toMillis() < 10000) : true;
+                setOtherIsTyping(typingData.isTyping && isRecent);
             } else {
                 setOtherIsTyping(false);
             }
+
+            // Read Status Logic
+            if (data?.readStatus && data.readStatus[otherUid]) {
+                setLastReadByOther(data.readStatus[otherUid]);
+            }
         });
 
-        return () => { unsubscribeMessages(); unsubscribeConvo(); };
-    }, [conversation.id, otherUid]);
+        return () => unsubscribeConvo();
+    }, [conversation.id, user, otherUid]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setNewMessage(e.target.value);
@@ -112,25 +133,18 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
 
         setNewMessage("");
         setTypingStatus(conversation.id, user.uid, false);
-        setEditingMessageId(null); // Clear edit mode if it was active (though usually cancelled)
+        setEditingMessageId(null);
 
         const convoRef = doc(db, "conversations", conversation.id);
 
         if (editingMessageId) {
-            // Update existing message
             const msgRef = doc(db, "conversations", conversation.id, "messages", editingMessageId);
-            await updateDoc(msgRef, {
-                text: text
-            });
-            // Optional: Update lastMessage of conversation if this was the last one?
-            // Complex to sync, usually fine to leave lastMessage/preview as is or update it.
-            // Let's perform a simple check:
+            await updateDoc(msgRef, { text: text });
             const lastMsg = messages[messages.length - 1];
             if (lastMsg.id === editingMessageId) {
                 await updateDoc(convoRef, { lastMessage: text });
             }
         } else {
-            // Send new message
             const messagesRef = collection(convoRef, "messages");
             await addDoc(messagesRef, {
                 text: text || (imageUrl ? "Sent an image" : ""),
@@ -148,7 +162,6 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
     };
 
     const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        // ... (unchanged)
         const file = e.target.files?.[0];
         if (!file || !user) return;
         setIsUploading(true);
@@ -272,9 +285,20 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
                                     <img src={msg.imageUrl} alt="Sent image" className="rounded-lg mb-2 max-w-full max-h-60 object-cover border border-white/20" />
                                 )}
                                 {msg.text}
-                                <span className={`text-[10px] block text-right mt-1 opacity-70 ${isMe ? 'text-blue-100' : 'text-slate-400'}`}>
-                                    {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
-                                </span>
+                                <div className={`flex items-center justify-end gap-1 mt-1 opacity-70 ${isMe ? 'text-blue-100' : 'text-slate-400'}`}>
+                                    <span className="text-[10px]">
+                                        {msg.createdAt?.toDate ? msg.createdAt.toDate().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '...'}
+                                    </span>
+                                    {isMe && (
+                                        <span title={msg.createdAt?.toMillis && lastReadByOther?.toMillis && msg.createdAt.toMillis() < lastReadByOther.toMillis() ? "Read" : "Sent"}>
+                                            {msg.createdAt?.toMillis && lastReadByOther?.toMillis && msg.createdAt.toMillis() < lastReadByOther.toMillis() ? (
+                                                <CheckCheck className="w-3 h-3" />
+                                            ) : (
+                                                <Check className="w-3 h-3" />
+                                            )}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     );
@@ -314,5 +338,3 @@ export default function ChatWindow({ conversation, onBack }: ChatWindowProps) {
         </>
     );
 }
-
-
