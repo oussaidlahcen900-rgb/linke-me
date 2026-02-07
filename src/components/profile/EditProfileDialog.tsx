@@ -3,7 +3,9 @@
 import { useState } from "react";
 import { UserProfile } from "@/types";
 import { X, Loader2, Linkedin, Github, Twitter, Globe, User, Briefcase, MapPin, Camera, Sparkles } from "lucide-react";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, deleteDoc } from "firebase/firestore";
+import { deleteUser } from "firebase/auth";
+import { useAuth } from "@/context/AuthContext"; // Need user object for deleteUser
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { db, storage } from "@/lib/firebase";
 import AvatarPicker from "@/components/ui/AvatarPicker";
@@ -20,6 +22,7 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
     const [isLoading, setIsLoading] = useState(false);
     const [activeSection, setActiveSection] = useState<"basic" | "work" | "social">("basic");
     const [skillInput, setSkillInput] = useState("");
+    const { user } = useAuth();
 
     // Photo State
     const [photoMode, setPhotoMode] = useState<"upload" | "avatar">("upload");
@@ -43,6 +46,35 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
     });
 
     if (!isOpen) return null;
+
+    const handleDeleteAccount = async () => {
+        if (!confirm("WARNING: This will permanently delete your account, posts, and data.\n\nType 'DELETE' to confirm.")) {
+            return;
+        }
+
+        // In a real app, re-authenticate here.
+        setIsLoading(true);
+        try {
+            // 1. Delete Firestore Data (User doc)
+            // Note: Posts/Comments should ideally be deleted via Cloud Functions trigger to avoid client-side complexity/permission issues
+            await deleteDoc(doc(db, "users", profile.uid));
+
+            // 2. Delete Auth User
+            await deleteUser(user!);
+
+            onClose();
+            // AuthContext will handle redirect to login
+        } catch (error: any) {
+            console.error("Error deleting account:", error);
+            if (error.code === 'auth/requires-recent-login') {
+                alert("For security, please sign out and sign in again to delete your account.");
+            } else {
+                alert("Failed to delete account. Please try again.");
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

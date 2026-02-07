@@ -1,8 +1,8 @@
 "use client";
 
-import { Share2, MoreHorizontal, MessageSquare, Heart, MapPin, Flag } from "lucide-react";
+import { Share2, MoreHorizontal, MessageSquare, Heart, MapPin, Flag, Trash2, Edit2 } from "lucide-react";
 import { db } from "@/lib/firebase";
-import { doc, updateDoc, arrayUnion, arrayRemove, addDoc, collection, serverTimestamp } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, arrayRemove, addDoc, collection, serverTimestamp, deleteDoc } from "firebase/firestore";
 import clsx from "clsx";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
@@ -73,6 +73,29 @@ export default function PostCard({ post }: { post: PostProps }) {
         }
     };
 
+    const [isEditing, setIsEditing] = useState(false);
+    const [editText, setEditText] = useState(post.text);
+
+    const handleDelete = async () => {
+        if (!confirm("Are you sure you want to delete this post?")) return;
+        try {
+            await deleteDoc(doc(db, "posts", post.id));
+        } catch (error) {
+            console.error("Error deleting post:", error);
+            alert("Failed to delete post.");
+        }
+    };
+
+    const handleUpdate = async () => {
+        try {
+            await updateDoc(doc(db, "posts", post.id), { text: editText });
+            setIsEditing(false);
+        } catch (error) {
+            console.error("Error updating post:", error);
+            alert("Failed to update post.");
+        }
+    };
+
     const handleShare = async () => {
         if (navigator.share) {
             try {
@@ -101,12 +124,29 @@ export default function PostCard({ post }: { post: PostProps }) {
                     <>
                         <div className="fixed inset-0 z-10" onClick={() => setShowMenu(false)}></div>
                         <div className="absolute right-0 top-8 w-48 bg-white rounded-xl shadow-xl border border-slate-100 z-20 py-1 overflow-hidden animate-in fade-in zoom-in-95 duration-200">
-                            <button
-                                onClick={handleReport}
-                                className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition font-medium flex items-center gap-2"
-                            >
-                                <Flag className="w-4 h-4" /> Report Post
-                            </button>
+                            {user?.uid === post.authorId ? (
+                                <>
+                                    <button
+                                        onClick={() => { setIsEditing(true); setShowMenu(false); }}
+                                        className="w-full text-left px-4 py-3 text-sm text-slate-600 hover:bg-slate-50 transition font-medium flex items-center gap-2"
+                                    >
+                                        <Edit2 className="w-4 h-4" /> Edit Post
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition font-medium flex items-center gap-2"
+                                    >
+                                        <Trash2 className="w-4 h-4" /> Delete Post
+                                    </button>
+                                </>
+                            ) : (
+                                <button
+                                    onClick={handleReport}
+                                    className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition font-medium flex items-center gap-2"
+                                >
+                                    <Flag className="w-4 h-4" /> Report Post
+                                </button>
+                            )}
                         </div>
                     </>
                 )}
@@ -150,13 +190,30 @@ export default function PostCard({ post }: { post: PostProps }) {
 
             {/* Content */}
             <div className="mb-4">
-                <Linkify text={post.text} className="text-slate-700 whitespace-pre-line block" />
-                {post.imageUrl && (
-                    <img
-                        src={post.imageUrl}
-                        alt="Post content"
-                        className="mt-4 rounded-lg w-full object-cover max-h-[400px] border border-slate-100"
-                    />
+                {isEditing ? (
+                    <div className="space-y-2">
+                        <textarea
+                            value={editText}
+                            onChange={(e) => setEditText(e.target.value)}
+                            className="w-full p-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-blue-500"
+                            rows={3}
+                        />
+                        <div className="flex justify-end gap-2">
+                            <button onClick={() => setIsEditing(false)} className="px-3 py-1 text-xs text-slate-500 hover:bg-slate-50 rounded-md">Cancel</button>
+                            <button onClick={handleUpdate} className="px-3 py-1 text-xs bg-blue-600 text-white rounded-md hover:bg-blue-700">Save</button>
+                        </div>
+                    </div>
+                ) : (
+                    <>
+                        <Linkify text={post.text} className="text-slate-700 whitespace-pre-line block" />
+                        {post.imageUrl && (
+                            <img
+                                src={post.imageUrl}
+                                alt="Post content"
+                                className="mt-4 rounded-lg w-full object-cover max-h-[400px] border border-slate-100"
+                            />
+                        )}
+                    </>
                 )}
             </div>
 
