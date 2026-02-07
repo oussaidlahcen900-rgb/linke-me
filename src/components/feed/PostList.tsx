@@ -9,16 +9,17 @@ import { Post } from "@/types";
 import PostCard from "./PostCard";
 import { where } from "firebase/firestore";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 export default function PostList({ userId }: { userId?: string }) {
     const [posts, setPosts] = useState<Post[]>([]);
     const [loading, setLoading] = useState(true);
+    const { t } = useLanguage();
 
     useEffect(() => {
         let q = query(collection(db, "posts"), orderBy("createdAt", "desc"));
-
+        // ... (rest of effect logic is same, only importing useLanguage above)
         if (userId) {
-            // Remove orderBy to avoid "Missing Index" error on dev environments
-            // We will sort client-side instead
             q = query(collection(db, "posts"), where("authorId", "==", userId));
         }
 
@@ -28,8 +29,6 @@ export default function PostList({ userId }: { userId?: string }) {
                 ...doc.data(),
             })) as Post[];
 
-            // Client-side sort to ensure order (especially for the filtered list)
-            // Assuming createdAt is a Firestore Timestamp
             newPosts.sort((a, b) => {
                 const timeA = a.createdAt?.seconds || 0;
                 const timeB = b.createdAt?.seconds || 0;
@@ -56,8 +55,8 @@ export default function PostList({ userId }: { userId?: string }) {
     if (!loading && posts.length === 0) {
         return (
             <div className="text-center py-12 bg-white rounded-xl border border-dashed border-slate-300">
-                <p className="text-slate-500 font-medium">No posts yet.</p>
-                <p className="text-slate-400 text-sm mt-1">Be the first to share something!</p>
+                <p className="text-slate-500 font-medium">{t('noPosts')}</p>
+                <p className="text-slate-400 text-sm mt-1">{t('beFirst')}</p>
             </div>
         );
     }

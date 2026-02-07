@@ -9,6 +9,8 @@ import { uploadFile } from "@/lib/storageUtils";
 import { GradientText } from "@/components/ui/GradientText";
 import clsx from "clsx";
 
+import { useLanguage } from "@/context/LanguageContext";
+
 export default function CreatePost() {
     const [text, setText] = useState("");
     const [loading, setLoading] = useState(false);
@@ -18,6 +20,7 @@ export default function CreatePost() {
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const { user, profile } = useAuth();
+    const { t } = useLanguage();
 
     const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
@@ -28,6 +31,7 @@ export default function CreatePost() {
         }
     };
 
+    // ... clearFile and handleSubmit (unchanged logic) ...
     const clearFile = () => {
         setSelectedFile(null);
         if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -80,7 +84,7 @@ export default function CreatePost() {
             <div className="p-1.5 bg-gradient-to-r from-blue-50 to-slate-50 border-b border-slate-100 flex items-center justify-between px-4">
                 <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-1.5">
                     <Sparkles className="w-3 h-3 text-blue-500" />
-                    Share your thoughts
+                    {t('shareThoughts')}
                 </span>
             </div>
 
@@ -97,7 +101,7 @@ export default function CreatePost() {
                             onChange={(e) => setText(e.target.value)}
                             onFocus={() => setIsFocused(true)}
                             onBlur={() => !text && !selectedFile && setIsFocused(false)}
-                            placeholder={`What's happening in ${profile?.city || "your city"}?`}
+                            placeholder={t('whatsHappening')}
                             className="w-full resize-none border-none focus:ring-0 text-slate-700 placeholder:text-slate-400 text-lg min-h-[80px] bg-transparent p-0 leading-relaxed"
                         />
 
@@ -134,7 +138,7 @@ export default function CreatePost() {
                                     className="flex items-center gap-2 px-3 py-1.5 rounded-full text-slate-500 hover:text-blue-600 hover:bg-blue-50 transition-colors text-sm font-medium"
                                 >
                                     <ImageIcon className="w-4 h-4" />
-                                    <span>Photo</span>
+                                    <span>{t('photo')}</span>
                                 </button>
                             </div>
 
@@ -149,7 +153,7 @@ export default function CreatePost() {
                                 )}
                             >
                                 {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                                <span>Post</span>
+                                <span>{t('postButton')}</span>
                             </button>
                         </div>
                     </div>

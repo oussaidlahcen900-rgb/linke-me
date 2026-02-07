@@ -8,10 +8,12 @@ import clsx from "clsx";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
+import { useLanguage } from "@/context/LanguageContext";
 
 export default function Sidebar() {
     const pathname = usePathname();
-    const { user, profile, signOut } = useAuth(); // Get profile for role check
+    const { user, profile, signOut } = useAuth();
+    const { t } = useLanguage();
     const [unreadCount, setUnreadCount] = useState(0);
 
     useEffect(() => {
@@ -28,32 +30,34 @@ export default function Sidebar() {
     }, [user]);
 
     const links = [
-        { name: "Feed", href: "/feed", icon: Home },
-        { name: "Jobs", href: "/jobs", icon: Briefcase },
-        { name: "Services", href: "/services", icon: CheckCircle },
-        { name: "Learning", href: "/learning", icon: BookOpen },
+        { name: t('feed'), href: "/feed", icon: Home },
+        { name: t('jobs'), href: "/jobs", icon: Briefcase },
+        { name: t('services'), href: "/services", icon: CheckCircle },
+        { name: t('learning'), href: "/learning", icon: BookOpen },
         {
-            name: "Notifications",
+            name: t('notifications'),
             href: "/notifications",
             icon: Bell,
             badge: unreadCount > 0 ? unreadCount : undefined
         },
-        { name: "My Network", href: "/network", icon: Users },
-        { name: "My Profile", href: "/profile", icon: User },
+        { name: t('myNetwork'), href: "/network", icon: Users },
+        { name: t('myProfile'), href: "/profile", icon: User },
         // Admin Link (Conditional)
         ...((profile?.role === 'admin' || profile?.role === 'owner') ? [{
-            name: "Admin Panel",
+            name: t('adminPanel'),
             href: "/admin",
-            icon: ShieldCheck // Using ShieldCheck (imported above) or similar
+            icon: ShieldCheck
         }] : []),
     ];
 
     return (
         <aside className="hidden md:flex flex-col w-64 bg-white border-r border-slate-100 h-screen fixed left-0 top-0 z-50">
             <div className="p-6">
-                <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
-                    Linke-Me
-                </h1>
+                <Link href="/feed">
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 text-transparent bg-clip-text">
+                        Linke-Me
+                    </h1>
+                </Link>
             </div>
 
             <nav className="flex-1 px-4 space-y-2">
@@ -61,7 +65,7 @@ export default function Sidebar() {
                     const isActive = pathname === link.href;
                     return (
                         <Link
-                            key={link.name}
+                            key={link.href}
                             href={link.href}
                             className={clsx(
                                 "flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
@@ -96,7 +100,7 @@ export default function Sidebar() {
                     <div className="transition-transform duration-300 group-hover:scale-110 group-hover:-rotate-3">
                         <LogOut className="w-5 h-5 text-slate-400 group-hover:text-red-500" />
                     </div>
-                    <span className="font-medium">Sign Out</span>
+                    <span className="font-medium">{t('signOut')}</span>
                 </button>
             </div>
         </aside>
