@@ -1,7 +1,11 @@
 import { formatDistanceToNow } from "date-fns";
 import { Timestamp } from "firebase/firestore";
 
-export function formatRelativeTime(date: any): string {
+interface FirestoreTimestamp {
+    toDate: () => Date;
+}
+
+export function formatRelativeTime(date: Timestamp | Date | number | FirestoreTimestamp | null | undefined): string {
     if (!date) return "Just now";
 
     let targetDate: Date;
@@ -12,9 +16,9 @@ export function formatRelativeTime(date: any): string {
         targetDate = date;
     } else if (typeof date === "number") {
         targetDate = new Date(date);
-    } else if (typeof date.toDate === "function") {
+    } else if (typeof (date as FirestoreTimestamp).toDate === "function") {
         // Handle object that looks like a timestamp
-        targetDate = date.toDate();
+        targetDate = (date as FirestoreTimestamp).toDate();
     } else {
         return "Just now";
     }

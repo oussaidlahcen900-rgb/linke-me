@@ -1,4 +1,5 @@
 import { db } from "@/lib/firebase";
+import { UserProfile } from "@/types";
 import { collection, addDoc, serverTimestamp, getDocs, updateDoc, doc, deleteDoc, query, orderBy, limit } from "firebase/firestore";
 
 const AVG_IMAGE_SIZE_MB = 0.3; // 300KB approx compressed
@@ -41,6 +42,54 @@ export async function getStorageStats() {
 }
 
 // ... existing storage stats code ...
+
+interface ChartData {
+    name: string;
+    users: number;
+    posts: number;
+}
+
+export const getAnalyticsData = async (): Promise<ChartData[]> => {
+    // In a real app, you would aggregate this data via Cloud Functions to avoid heavy client-side reads.
+    // For this demo, we'll simulate the data or fetch a small subset.
+
+    const last7Days = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        return d.toLocaleDateString('en-US', { weekday: 'short' });
+    }).reverse();
+
+    return last7Days.map(day => ({
+        name: day,
+        users: Math.floor(Math.random() * 50) + 10,
+        posts: Math.floor(Math.random() * 100) + 20,
+    }));
+};
+
+export const getRecentUsers = async (): Promise<UserProfile[]> => {
+    try {
+        const q = query(
+            collection(db, "users"),
+            // orderBy("createdAt", "desc"), // Requires index
+            limit(5)
+        );
+        const snapshot = await getDocs(q);
+        return snapshot.docs.map(doc => doc.data() as UserProfile);
+    } catch (error) {
+        console.error("Error fetching recent users:", error);
+        return [];
+    }
+};
+
+export const getMockStorageStats = async () => { // Renamed to avoid conflict
+    // Mocking storage stats as Firebase Client SDK doesn't support getMetadata for all files easily
+    // In production, use Cloud Functions to track usage.
+    return {
+        used: 4.2, // GB
+        total: 5.0, // GB
+        percentage: 84
+    };
+};
 
 // --- User Management ---
 export async function getAllUsers() {

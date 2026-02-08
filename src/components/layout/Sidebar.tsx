@@ -23,7 +23,7 @@ export default function Sidebar() {
             where("recipientId", "==", user.uid),
             where("read", "==", false)
         );
-        const unsubscribe = onSnapshot(q, (snapshot) => {
+        const unsubscribe = onSnapshot(q, (snapshot: any) => {
             setUnreadCount(snapshot.size);
         });
         return () => unsubscribe();

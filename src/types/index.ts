@@ -1,3 +1,5 @@
+import { Timestamp } from "firebase/firestore";
+
 export interface UserProfile {
     uid: string;
     displayName?: string;
@@ -20,7 +22,7 @@ export interface UserProfile {
     friendRequests?: {
         uid: string;
         status: 'pending' | 'accepted' | 'rejected';
-        timestamp: any;
+        timestamp: Timestamp | any;
     }[];
     hasSeenWelcome?: boolean;
 }
@@ -34,8 +36,7 @@ export interface Post {
     authorAvatar: string;
     authorVerified?: boolean; // Snapshot of verification status
     likes: number;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createdAt: any; // Firestore Timestamp
+    createdAt: Timestamp | any; // Firestore Timestamp
 }
 export interface Job {
     id: string;
@@ -47,8 +48,7 @@ export interface Job {
     description: string;
     authorId: string;
     authorVerified?: boolean; // Snapshot
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    postedAt: any; // Firestore Timestamp or string for display
+    postedAt: Timestamp | any; // Firestore Timestamp or string for display
     contactEmail?: string;
 }
 
@@ -62,8 +62,7 @@ export interface Service {
     location: string;
     contactPhone: string;
     authorId: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    postedAt: any;
+    postedAt: Timestamp | any;
 }
 
 export interface Course {
@@ -76,8 +75,7 @@ export interface Course {
     duration?: string;
     price?: string;
     authorId: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createdAt: any;
+    createdAt: Timestamp | any;
 }
 
 export interface Message {
@@ -85,8 +83,7 @@ export interface Message {
     text: string;
     imageUrl?: string;
     senderId: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    createdAt: any;
+    createdAt: Timestamp | any;
     read: boolean;
 }
 
@@ -94,8 +91,7 @@ export interface Conversation {
     id: string;
     participants: string[]; // [uid1, uid2]
     lastMessage: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    lastMessageAt: any;
+    lastMessageAt: Timestamp | any;
     unreadCount: Record<string, number>; // { uid: count }
     // Joined data for display
     otherUser?: {

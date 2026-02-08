@@ -12,7 +12,7 @@ export default function LandingPage() {
   const { t, direction } = useLanguage();
 
   return (
-    <div className="flex flex-col h-screen relative text-slate-800 font-sans overflow-hidden bg-slate-50" dir={direction}>
+    <div className="flex flex-col min-h-screen relative text-slate-800 font-sans overflow-x-hidden bg-slate-50" dir={direction}>
       {/* Dynamic Background with Blobs */}
       {/* Hero Background - Futuristic DNA Theme */}
       <div

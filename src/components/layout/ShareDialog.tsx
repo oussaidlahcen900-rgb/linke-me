@@ -34,7 +34,10 @@ export default function ShareDialog({ isOpen, onClose, city }: ShareDialogProps)
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-in fade-in duration-200">
             <div className="bg-white rounded-2xl w-full max-w-md overflow-hidden shadow-2xl animate-in zoom-in-95 duration-200 flex flex-col relative">
 
-                <button onClick={onClose} className="absolute top-4 right-4 p-2 text-slate-400 hover:bg-slate-50 rounded-full transition z-10">
+                <button
+                    onClick={onClose}
+                    className="absolute top-4 right-4 p-2 text-white/70 hover:text-white hover:bg-white/20 rounded-full transition z-20"
+                >
                     <X className="w-5 h-5" />
                 </button>
 
