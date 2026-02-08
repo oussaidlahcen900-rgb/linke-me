@@ -36,9 +36,10 @@ export default function ShareDialog({ isOpen, onClose, city }: ShareDialogProps)
 
                 <button
                     onClick={onClose}
-                    className="absolute top-4 right-4 p-2 text-white/70 hover:text-white hover:bg-white/20 rounded-full transition z-20"
+                    className="absolute top-3 right-3 p-2 bg-white/10 hover:bg-white/20 text-white rounded-full transition z-50 backdrop-blur-md border border-white/20 shadow-lg"
+                    aria-label="Close"
                 >
-                    <X className="w-5 h-5" />
+                    <X className="w-6 h-6 drop-shadow-md" />
                 </button>
 
                 <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-center text-white">
