@@ -39,7 +39,6 @@ export const translations = {
         roleMember: "Member",
         suggestedForYou: "Suggested for you",
         promoted: "Promoted",
-        me: "Me",
         // Create Post
         shareThoughts: "Share your thoughts",
         whatsHappening: "What's happening in your city?",
