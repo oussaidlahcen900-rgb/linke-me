@@ -1,15 +1,17 @@
 "use client";
 
-import { Bell, Search, MapPin, Menu, X, Home, Briefcase, Wrench, GraduationCap, User, MessageSquare, LogOut } from "lucide-react";
+import { Bell, Search, MapPin, Menu, X, Home, Briefcase, Wrench, GraduationCap, User, MessageSquare, LogOut, QrCode } from "lucide-react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import SearchBar from "@/components/layout/SearchBar";
 import { useAuth } from "@/context/AuthContext";
+import ShareDialog from "./ShareDialog";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 
 export default function Navbar() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isShareOpen, setIsShareOpen] = useState(false);
     const { user, profile, signOut } = useAuth();
     const [unreadCount, setUnreadCount] = useState(0);
 
@@ -59,6 +61,14 @@ export default function Navbar() {
                     </button>
                 )}
 
+                <button
+                    onClick={() => setIsShareOpen(true)}
+                    className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full text-sm font-medium hover:opacity-90 transition shadow-sm"
+                >
+                    <QrCode className="h-4 w-4" />
+                    <span>Share</span>
+                </button>
+
                 <Link href="/chat" className="relative rounded-full p-2 text-slate-500 hover:bg-slate-100 transition group" title="Messages">
                     <MessageSquare className="h-5 w-5" />
                 </Link>
@@ -78,6 +88,12 @@ export default function Navbar() {
                     />
                 </Link>
             </div>
+
+            <ShareDialog
+                isOpen={isShareOpen}
+                onClose={() => setIsShareOpen(false)}
+                city={profile?.city}
+            />
 
             {/* Mobile Menu Overlay */}
             {isMobileMenuOpen && (

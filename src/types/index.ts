@@ -22,6 +22,7 @@ export interface UserProfile {
         status: 'pending' | 'accepted' | 'rejected';
         timestamp: any;
     }[];
+    hasSeenWelcome?: boolean;
 }
 
 export interface Post {

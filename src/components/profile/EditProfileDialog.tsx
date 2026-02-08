@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { UserProfile } from "@/types";
-import { X, Loader2, Linkedin, Github, Twitter, Globe, User, Briefcase, MapPin, Camera, Sparkles } from "lucide-react";
+import { X, Loader2, Linkedin, Github, Twitter, Globe, User, Briefcase, MapPin, Camera, Sparkles, ShieldCheck } from "lucide-react";
 import { doc, updateDoc, deleteDoc } from "firebase/firestore";
 import { deleteUser } from "firebase/auth";
 import { useAuth } from "@/context/AuthContext"; // Need user object for deleteUser
@@ -20,7 +20,7 @@ interface EditProfileDialogProps {
 
 export default function EditProfileDialog({ isOpen, onClose, profile }: EditProfileDialogProps) {
     const [isLoading, setIsLoading] = useState(false);
-    const [activeSection, setActiveSection] = useState<"basic" | "work" | "social">("basic");
+    const [activeSection, setActiveSection] = useState<"basic" | "work" | "social" | "account">("basic");
     const [skillInput, setSkillInput] = useState("");
     const { user } = useAuth();
 
@@ -46,6 +46,38 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
     });
 
     if (!isOpen) return null;
+
+    const handleGetLocation = () => {
+        if (!navigator.geolocation) {
+            alert("Geolocation is not supported by your browser");
+            return;
+        }
+
+        setIsLoading(true);
+        navigator.geolocation.getCurrentPosition(async (position) => {
+            try {
+                const { latitude, longitude } = position.coords;
+                // Use a free reverse geocoding API (BigDataCloud is a good free option for client-side)
+                const response = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${latitude}&longitude=${longitude}&localityLanguage=en`);
+                const data = await response.json();
+
+                if (data.city || data.locality) {
+                    setFormData(prev => ({ ...prev, city: data.city || data.locality }));
+                } else {
+                    alert("Could not detect city name.");
+                }
+            } catch (error) {
+                console.error("Error fetching location:", error);
+                alert("Failed to fetch location name.");
+            } finally {
+                setIsLoading(false);
+            }
+        }, (error) => {
+            console.error("Geolocation error:", error);
+            alert("Unable to retrieve your location.");
+            setIsLoading(false);
+        });
+    };
 
     const handleDeleteAccount = async () => {
         if (!confirm("WARNING: This will permanently delete your account, posts, and data.\n\nType 'DELETE' to confirm.")) {
@@ -162,6 +194,12 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
                         className={`px-4 py-3 text-sm font-semibold flex items-center gap-2 border-b-2 transition ${activeSection === "social" ? "border-blue-600 text-blue-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}
                     >
                         <MapPin className="w-4 h-4" /> Location & Social
+                    </button>
+                    <button
+                        onClick={() => setActiveSection("account")}
+                        className={`px-4 py-3 text-sm font-semibold flex items-center gap-2 border-b-2 transition ${activeSection === "account" ? "border-red-600 text-red-600" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                    >
+                        <ShieldCheck className="w-4 h-4" /> Account
                     </button>
                 </div>
 
@@ -305,13 +343,24 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
                         <div className="space-y-4 animate-in slide-in-from-right-4 duration-300">
                             <div>
                                 <label className="block text-sm font-medium text-slate-700 mb-1">Location (City)</label>
-                                <input
-                                    type="text"
-                                    value={formData.city}
-                                    onChange={e => setFormData({ ...formData, city: e.target.value })}
-                                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition bg-slate-50/50 focus:bg-white"
-                                    placeholder="e.g. New York, NY"
-                                />
+                                <div className="flex gap-2">
+                                    <input
+                                        type="text"
+                                        value={formData.city}
+                                        onChange={e => setFormData({ ...formData, city: e.target.value })}
+                                        className="flex-1 px-4 py-2.5 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 outline-none transition bg-slate-50/50 focus:bg-white"
+                                        placeholder="e.g. New York, NY"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={handleGetLocation}
+                                        className="px-4 py-2 bg-blue-50 text-blue-600 rounded-xl font-medium hover:bg-blue-100 transition flex items-center gap-2 whitespace-nowrap"
+                                        title="Auto-detect Location"
+                                    >
+                                        <MapPin className="w-4 h-4" />
+                                        <span className="hidden sm:inline">Auto-Detect</span>
+                                    </button>
+                                </div>
                             </div>
 
                             <div className="pt-4 border-t border-slate-100 text-sm font-bold text-slate-900 uppercase tracking-wider">Social Profiles</div>
@@ -352,6 +401,33 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
                     )}
 
                 </form>
+
+                {activeSection === "account" && (
+                    <div className="flex-1 overflow-y-auto p-6 space-y-6 animate-in slide-in-from-right-4 duration-300">
+
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                            <h3 className="text-sm font-bold text-blue-900 mb-2">Account Status</h3>
+                            <p className="text-sm text-blue-700">Your account is active. You are a member of the Linke-Me community.</p>
+                        </div>
+
+                        <div className="pt-2 border-t border-slate-100">
+                            <h3 className="text-sm font-bold text-red-600 uppercase tracking-wider mb-4">Danger Zone</h3>
+                            <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center justify-between">
+                                <div>
+                                    <p className="text-sm font-medium text-red-900">Delete Account</p>
+                                    <p className="text-xs text-red-700 mt-0.5">Permanently remove your account and all data.</p>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleDeleteAccount}
+                                    className="px-4 py-2 bg-white border border-red-200 text-red-600 text-sm font-medium rounded-lg hover:bg-red-600 hover:text-white transition shadow-sm"
+                                >
+                                    Delete Account
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* Footer Actions */}
                 <div className="p-6 border-t border-slate-100 bg-white shrink-0 flex justify-end gap-3">

@@ -8,6 +8,7 @@ import Navbar from "@/components/layout/Navbar";
 import { UseWelcomeSound } from "@/hooks/useWelcomeSound";
 import { Loader2 } from "lucide-react";
 import { WavingMascot } from "@/components/ui/WavingMascot";
+import WelcomeDialog from "@/components/onboarding/WelcomeDialog";
 
 export default function DashboardLayout({
     children,
@@ -38,6 +39,7 @@ export default function DashboardLayout({
     return (
         <div className="min-h-screen bg-slate-50">
             <UseWelcomeSound />
+            <WelcomeDialog />
             <WavingMascot />
             <Sidebar />
             <div className="md:pl-64">
