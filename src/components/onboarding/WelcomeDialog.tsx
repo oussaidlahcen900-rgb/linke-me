@@ -16,8 +16,11 @@ export default function WelcomeDialog() {
     useEffect(() => {
         // Show if user exists, has a profile, and has NOT seen welcome yet
         if (user && profile && !profile.hasSeenWelcome) {
-            setIsOpen(true);
-            triggerConfetti();
+            // Use setTimeout to avoid cascading renders
+            setTimeout(() => {
+                setIsOpen(true);
+                triggerConfetti();
+            }, 0);
         }
     }, [user, profile]);
 
@@ -69,13 +72,13 @@ export default function WelcomeDialog() {
                 <div className="px-8 pb-8 -mt-10 relative z-10">
                     <h2 className="text-2xl font-black text-slate-900 mb-2">Welcome, {profile?.displayName?.split(' ')[0] || "Friend"}!</h2>
                     <p className="text-slate-600 mb-6">
-                        We're so happy you're here. Connect with your city, find opportunities, and grow your network.
+                        We&apos;re so happy you&apos;re here. Connect with your city, find opportunities, and grow your network.
                     </p>
 
                     <div className="space-y-3 mb-6 text-left bg-slate-50 p-4 rounded-xl border border-slate-100">
                         <div className="flex items-center gap-3 text-sm text-slate-700">
                             <div className="w-6 h-6 rounded-full bg-green-100 flex items-center justify-center text-green-600 shrink-0"><Check className="w-3 h-3" /></div>
-                            <span>Set up your profile & location</span>
+                            <span>Set up your profile &amp; location</span>
                         </div>
                         <div className="flex items-center gap-3 text-sm text-slate-700">
                             <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0"><Check className="w-3 h-3" /></div>
@@ -83,7 +86,7 @@ export default function WelcomeDialog() {
                         </div>
                         <div className="flex items-center gap-3 text-sm text-slate-700">
                             <div className="w-6 h-6 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 shrink-0"><Check className="w-3 h-3" /></div>
-                            <span>Explore jobs & services</span>
+                            <span>Explore jobs &amp; services</span>
                         </div>
                     </div>
 
@@ -91,7 +94,7 @@ export default function WelcomeDialog() {
                         onClick={handleClose}
                         className="w-full py-3.5 bg-slate-900 text-white font-bold rounded-xl hover:bg-slate-800 transition shadow-lg hover:shadow-xl hover:-translate-y-0.5"
                     >
-                        Let's Get Started 🚀
+                        Let&apos;s Get Started 🚀
                     </button>
                 </div>
 
