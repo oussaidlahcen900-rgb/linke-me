@@ -42,7 +42,8 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
             github: profile.socialLinks?.github || "",
             twitter: profile.socialLinks?.twitter || "",
             website: profile.socialLinks?.website || ""
-        }
+        },
+        hideBio: profile.hideBio || false
     });
 
     if (!isOpen) return null;
@@ -134,7 +135,8 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
                 role: formData.role,
                 experience: formData.experience,
                 skills: formData.skills,
-                socialLinks: formData.socialLinks
+                socialLinks: formData.socialLinks,
+                hideBio: formData.hideBio
             });
             onClose();
         } catch (error) {
@@ -410,6 +412,23 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
                             <p className="text-sm text-blue-700">Your account is active. You are a member of the Linke-Me community.</p>
                         </div>
 
+                        <div className="bg-slate-50 border border-slate-100 rounded-xl p-4 flex items-center justify-between">
+                            <div>
+                                <h3 className="text-sm font-bold text-slate-900">Privacy Settings</h3>
+                                <p className="text-xs text-slate-500 mt-1">Hide your bio and details from public view.</p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    checked={formData.hideBio}
+                                    onChange={(e) => setFormData({ ...formData, hideBio: e.target.checked })}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
+                                <span className="ml-3 text-sm font-medium text-slate-700">{formData.hideBio ? 'Hidden' : 'Visible'}</span>
+                            </label>
+                        </div>
+
                         <div className="pt-2 border-t border-slate-100">
                             <h3 className="text-sm font-bold text-red-600 uppercase tracking-wider mb-4">Danger Zone</h3>
                             <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center justify-between">
@@ -448,6 +467,6 @@ export default function EditProfileDialog({ isOpen, onClose, profile }: EditProf
                     </button>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

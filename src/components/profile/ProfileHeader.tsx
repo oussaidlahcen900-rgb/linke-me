@@ -114,20 +114,39 @@ export default function ProfileHeader({ profile, postCount }: ProfileHeaderProps
                             {profile.headline || profile.role || "Community Member"}
                         </p>
                         <div className="flex items-center justify-center gap-4 mt-2 text-slate-500 text-sm">
-                            {profile.city && (
-                                <span className="flex items-center gap-1">
-                                    <MapPin className="w-4 h-4" />
-                                    {profile.city}
-                                </span>
+                            {(!profile.hideBio || isOwnProfile) && (
+                                <>
+                                    {profile.city && (
+                                        <span className="flex items-center gap-1">
+                                            <MapPin className="w-4 h-4" />
+                                            {profile.city}
+                                        </span>
+                                    )}
+                                    <span className="flex items-center gap-1">
+                                        <Calendar className="w-4 h-4" />
+                                        Joined {new Date().getFullYear()}
+                                    </span>
+                                </>
                             )}
-                            <span className="flex items-center gap-1">
-                                <Calendar className="w-4 h-4" />
-                                Joined {new Date().getFullYear()}
-                            </span>
                         </div>
                     </div>
 
-                    {/* Completion Indicator */}
+                    {/* Private Profile Message */}
+                    {profile.hideBio && !isOwnProfile && (
+                        <div className="mt-6 w-full max-w-md text-center bg-slate-50 p-6 rounded-xl border border-slate-100">
+                            <div className="w-12 h-12 bg-slate-200 rounded-full mx-auto flex items-center justify-center mb-3">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" className="w-6 h-6 text-slate-400" strokeWidth="2">
+                                    <path d="M12 15a3 3 0 100-6 3 3 0 000 6z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 3l18 18" />
+                                </svg>
+                            </div>
+                            <h3 className="text-slate-900 font-bold">This profile is private</h3>
+                            <p className="text-slate-500 text-sm mt-1">Bio and other details are hidden.</p>
+                        </div>
+                    )}
+
+                    {/* Completion Indicator (Only for Owner) */}
                     {isOwnProfile && completionPercentage < 100 && (
                         <div className="mt-6 w-full max-w-sm">
                             <div className="flex justify-between items-center mb-1">

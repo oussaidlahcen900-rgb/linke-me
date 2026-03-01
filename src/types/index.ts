@@ -25,6 +25,7 @@ export interface UserProfile {
         timestamp: Timestamp | any;
     }[];
     hasSeenWelcome?: boolean;
+    hideBio?: boolean;
 }
 
 export interface Post {
